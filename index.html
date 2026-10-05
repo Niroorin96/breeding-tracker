@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Breeding Tracker · Poke Idle World</title>
+   <link rel="icon" type="image/png" href="ICO.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;600;700&family=DM+Mono:wght@400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script>try{var _t=localStorage.getItem("piw_theme");document.documentElement.setAttribute("data-theme",_t||"dark")}catch(e){}</script>
+<style>
+:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f4f5fa;--card:#fff;--line:#e2e4ee;--tx:#1d2033;--mu:#6b708a;--ac:#e5484d;--ac2:#3b5bdb;--ok:#2f9e6b;--warn:#d98a00}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#12141f;--card:#1c1f2f;--line:#2c3048;--tx:#eceefa;--mu:#9095b3;--ac:#ff5a5f;--ac2:#7c93ff;--ok:#41c98d;--warn:#f0b429}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#12141f;--card:#1c1f2f;--line:#2c3048;--tx:#eceefa;--mu:#9095b3;--ac:#ff5a5f;--ac2:#7c93ff;--ok:#41c98d;--warn:#f0b429}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 "Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:10px 16px}
+header b{font-size:17px;cursor:pointer}header .sp{flex:1}
+main{max-width:980px;margin:0 auto;padding:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.pk,.cc{cursor:pointer;transition:transform .12s,border-color .12s;min-width:0}.pk:hover,.cc:hover{transform:translateY(-2px);border-color:var(--ac2)}
+.row>div{min-width:0}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+.cc .sub2{font-size:12px;margin-top:2px}.mini{margin-top:10px;min-height:54px}.mini svg{max-width:100%}
+.sech{margin:26px 0 10px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mu)}
+.modal .card.cw{max-width:700px}
+.chips.lg span{display:inline-flex;align-items:center;gap:5px;background:none;padding:2px 8px 2px 0;font-size:12px}.chips.lg i{display:inline-block;width:9px;height:9px;border-radius:50%}
+.seg{display:block;height:100%}
+.sti{width:28px;height:28px;object-fit:contain;image-rendering:pixelated;flex:none}
+.pr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.pr div{background:var(--bg);border-radius:9px;padding:6px 9px}.pr small{display:block;color:var(--mu);font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}.pr b{font-size:15px}
+.opts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.opts button{flex:1;min-width:110px;text-align:left;padding:7px 10px}.opts small{display:block;color:var(--mu);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.al{display:block}.al[title]{cursor:help}.al[title] b{border-bottom:1px dotted var(--mu)}
+.tog{display:flex;align-items:center;gap:10px;margin:4px 0 14px;color:var(--mu);font-size:13px}.tog:before,.tog:after{content:"";flex:1;border-top:1px dashed var(--line)}
+.ib .sti{width:18px;height:18px}.ib.cc:hover{transform:none}
+.ft{text-align:center;font-size:12px;color:var(--mu);padding:30px 16px 22px;opacity:.85}.ft a{color:inherit;text-decoration:underline dotted}.ft a:hover{color:var(--tx)}
+.av img.px{image-rendering:pixelated}
+:root[data-theme="dark"] .modal{background:#000a}
+.themebtn{font-size:15px;line-height:1;padding:5px 9px}
+.warn{background:var(--bg);border:1px dashed var(--warn);border-radius:9px;padding:6px 10px;font-size:12px;color:var(--mu);margin-top:6px}
+.av{width:56px;height:56px;flex:none;border-radius:14px;display:grid;place-items:center;font-weight:700;font-size:22px;color:#fff;background:linear-gradient(135deg,var(--ac),var(--ac2));overflow:hidden}.av.lg{width:84px;height:84px;font-size:32px;border-radius:18px}.av:has(img){background:var(--bg);border:1px solid var(--line)}.av img{width:100%;height:100%;object-fit:contain}
+.row{display:flex;align-items:center;gap:10px}.sp{flex:1}
+.mu{color:var(--mu);font-size:13px}.big{font-size:22px;font-weight:700}
+.tag{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:600;color:#fff}
+.st{background:var(--mu)}.st.Chocando{background:var(--warn)}.st.Finalizado{background:var(--ok)}
+button,.btn{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--tx);padding:7px 13px;border-radius:9px;cursor:pointer}
+button.pri{background:var(--ac);border-color:var(--ac);color:#fff;font-weight:600}
+button.sm{padding:3px 9px;font-size:13px}
+input,select{font:inherit;background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:7px 9px;width:100%}
+label{display:block;font-size:12px;color:var(--mu);margin:8px 0 3px}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.f3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+.bar{height:8px;border-radius:9px;background:var(--line);overflow:hidden;margin-top:8px}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ac2),var(--ac))}
+.tl{border-left:3px solid var(--line);margin-left:8px;padding-left:16px}
+.br{position:relative;margin-bottom:12px}.br:before{content:"";position:absolute;left:-24px;top:16px;width:13px;height:13px;border-radius:50%;background:var(--ac2);border:3px solid var(--bg)}
+.br.Finalizado:before{background:var(--ok)}.br.Chocando:before{background:var(--warn)}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:8px;margin-top:10px}
+.kv div{background:var(--bg);border-radius:9px;padding:7px 10px}.kv small{display:block;color:var(--mu);font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin-bottom:2px}
+.up{color:var(--ok);font-weight:700}.eq{color:var(--mu)}
+.modal{position:fixed;inset:0;background:#0008;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:20px 10px;z-index:20}
+.modal .card{width:100%;max-width:560px}
+.wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}td,th{padding:5px 8px;border-bottom:1px solid var(--line);text-align:left}
+.ch{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}.sq{min-height:200px;display:flex;flex-direction:column;gap:8px}.ln{display:flex;justify-content:space-between;background:var(--bg);border-radius:9px;padding:9px 12px}.strow{display:grid;grid-template-columns:1.4fr 1fr .8fr 1fr auto;gap:8px;align-items:end;margin-bottom:6px}
+.login{max-width:340px;margin:12vh auto}
+.err{color:var(--ac);font-size:13px;min-height:18px}
+.usd{color:var(--ok);font-weight:700}
+.lbl{color:var(--mu);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.ini{color:var(--mu);font-size:13px;line-height:1.1;text-align:center}.ini small{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.05em}
+.arr{color:var(--mu);font-size:14px}
+.foot{flex-wrap:wrap;margin-top:10px;font-size:13px;color:var(--mu)}.foot b{color:var(--tx)}
+.info{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px;margin-top:6px}
+.ib{border:1px dashed var(--line);border-radius:10px;padding:8px 11px;font-size:12px;color:var(--mu)}
+.ib b{font-size:12px;font-weight:600;color:var(--mu);display:block;margin-bottom:5px}
+.chips{display:flex;flex-wrap:wrap;gap:5px}.chips span{background:var(--bg);border-radius:99px;padding:2px 8px;font-size:11.5px}
+.reft{margin-top:22px;font-size:12px;color:var(--mu);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.chk{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tx);margin:12px 0 4px;cursor:pointer}.chk input{width:auto;accent-color:var(--ac)}
+.sec{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:12px}
+.sh{display:flex;gap:10px;align-items:flex-start;margin-bottom:4px}.sh .n{flex:none;width:22px;height:22px;border-radius:50%;background:var(--ac2);color:#fff;font-size:12px;font-weight:700;display:grid;place-items:center;margin-top:1px}
+.sub{margin-top:12px;padding-top:10px;border-top:1px dashed var(--line)}.sub:first-of-type{border-top:0;padding-top:0}
+.sub>b{font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--ac2)}
+.stb{background:var(--bg);border-radius:10px;padding:8px 10px;margin:8px 0}
+.mny{position:relative}.mny span{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--ok);font-weight:700}.mny input{padding-left:24px}
+.fix{display:flex;justify-content:space-between;align-items:center;background:var(--bg);border-radius:9px;padding:9px 12px;margin-top:12px;font-size:13px;color:var(--mu)}.fix b{color:var(--tx)}
+@media(max-width:480px){.f2,.f3{grid-template-columns:1fr}}
+/* ===== Identidade visual: noite pixel-art, molduras com cantos "serrilhados" ===== */
+:root,:root[data-theme="light"]{--bg:#cfe3f7;--card:#f7fbff;--line:#8fa9d4;--rim:#3d5fa8;--tx:#14203f;--mu:#4b5d85;--gold:#a86f00;--goldtx:#fff;--red:#d62d2d;--ac:#c93a40;--ac2:#3b5bdb;--ok:#1f8f5f;--warn:#b9780a;--notch:polygon(0 4px,4px 4px,4px 0,calc(100% - 4px) 0,calc(100% - 4px) 4px,100% 4px,100% calc(100% - 4px),calc(100% - 4px) calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,4px calc(100% - 4px),0 calc(100% - 4px))}
+:root[data-theme="dark"]{--bg:#070b1c;--card:#0d1430;--line:#2a3566;--rim:#4a5cab;--tx:#eef1ff;--mu:#9aa4cf;--gold:#ffd23f;--goldtx:#1a1405;--red:#ee3b3b;--ac:#ff6b70;--ac2:#7aa2ff;--ok:#3ddc97;--warn:#ffb020}
+body{font:14px/1.55 "DM Mono",ui-monospace,Menlo,Consolas,monospace}
+:root[data-theme="dark"] body{background:radial-gradient(1.5px 1.5px at 20px 30px,#fff 50%,#0000 51%),radial-gradient(1px 1px at 90px 120px,#cfd8ff 50%,#0000 51%),radial-gradient(2px 2px at 160px 70px,#ffe9a8 50%,#0000 51%),linear-gradient(#050816,#0a1033 55%,#161c52);background-size:210px 190px,130px 150px,260px 230px,100% 100%;background-attachment:fixed}
+:root[data-theme="light"] body{background:linear-gradient(#bcd9f6,#e4f0fb 60%,#cfe8c8)fixed}
+body:before{content:"";position:fixed;top:150px;right:3%;width:52px;height:52px;background:radial-gradient(circle at 35% 35%,#fffbe0 55%,#e9dfa8 56%);clip-path:polygon(25% 0,75% 0,75% 12%,88% 12%,88% 25%,100% 25%,100% 75%,88% 75%,88% 88%,75% 88%,75% 100%,25% 100%,25% 88%,12% 88%,12% 75%,0 75%,0 25%,12% 25%,12% 12%,25% 12%);opacity:.9;z-index:0;pointer-events:none}
+:root[data-theme="light"] body:before{display:none}
+body:after{content:"";position:fixed;left:0;right:0;bottom:0;height:150px;background:#050818;opacity:.85;z-index:0;pointer-events:none;clip-path:polygon(0 72%,6% 72%,6% 56%,12% 56%,12% 40%,18% 40%,18% 56%,24% 56%,24% 72%,34% 72%,34% 60%,40% 60%,40% 30%,46% 30%,46% 14%,52% 14%,52% 30%,58% 30%,58% 60%,66% 60%,66% 76%,76% 76%,76% 56%,82% 56%,82% 44%,88% 44%,88% 60%,94% 60%,94% 76%,100% 76%,100% 100%,0 100%)}
+:root[data-theme="light"] body:after{background:#7fae6a;opacity:.6}
+main,.ft{position:relative;z-index:1}
+.big,header b,.sech,.reft,.pk b,.tag,button.pri{font-family:"Pixelify Sans","DM Mono",monospace}
+.big{font-weight:700}
+header{background:#050818e6;border-bottom:2px solid var(--rim);backdrop-filter:blur(3px)}
+:root[data-theme="light"] header{background:#f7fbffee}
+header b{font-size:20px;color:var(--tx);text-shadow:2px 2px 0 #c2410c;display:flex;align-items:center;gap:8px}
+   .pball{width:28px;height:28px;flex:none;object-fit:contain;image-rendering:pixelated}
+.card,.ledger{--c:var(--cc,var(--rim));background:var(--card);border:2px solid var(--c);border-radius:0;clip-path:var(--notch);box-shadow:inset 0 0 0 2px var(--card),inset 0 0 0 3px color-mix(in srgb,var(--c) 40%,transparent)}
+.cc .lbl{color:var(--c);font-weight:500}
+.pk{--cc:var(--gold)}
+.pk:hover,.cc:hover{transform:none;border-color:var(--c);filter:brightness(1.15)}
+.pk,.cc{transition:filter .15s}
+.cch{gap:8px;margin-bottom:6px}
+.ict{display:grid;place-items:center;width:32px;height:32px;flex:none;font-size:16px;background:color-mix(in srgb,var(--c) 16%,var(--bg));border:2px solid color-mix(in srgb,var(--c) 55%,transparent)}
+.lbl,.kv small,.pr small,.ini small,.opts small{text-transform:none;letter-spacing:0;font-size:12px;font-weight:500;color:var(--mu)}
+.sech,.reft{text-transform:none;letter-spacing:0;font-size:17px;font-weight:600;color:var(--tx);margin:30px 0 12px}
+.reft{font-size:14px;color:var(--mu)}
+.ptitle,.hero .row>div>.big:first-child{font-size:36px;line-height:1.05;color:#fff;text-shadow:3px 3px 0 #c2410c}
+:root[data-theme="light"] .ptitle,:root[data-theme="light"] .hero .row>div>.big:first-child{color:#14203f;text-shadow:3px 3px 0 #ffd23f}
+.parade{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;padding:6px 0 10px;margin:8px 0 14px;border-bottom:2px dashed var(--line)}
+.av.ps,.av.ps:has(img){width:96px;height:96px;background:none;border:0}
+button{font:inherit;border:2px solid var(--line);background:var(--card);color:var(--tx);border-radius:0;box-shadow:0 3px 0 #0007;padding:5px 12px}
+button:hover{border-color:var(--gold)}
+button:active{transform:translateY(2px);box-shadow:0 1px 0 #0007}
+button.pri{background:var(--red);border-color:color-mix(in srgb,var(--red) 55%,#fff);color:#fff;font-weight:600}
+button.sm{padding:2px 9px}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+input,select{border-radius:0;border-width:2px}
+.usd{color:var(--gold)}
+.big.usd,.pk .usd{font-family:"Pixelify Sans",monospace}
+.av{border-radius:0}
+.av:has(img){background:radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--gold) 18%,var(--bg)),var(--bg));border:2px solid var(--rim)}
+.av img.px{image-rendering:pixelated}
+.pk .av{width:56px;height:56px}
+.ledger{--cc:var(--gold);padding:6px 0}
+.ledger .stat{background:none;border:0;border-radius:0;border-left:2px dashed var(--line);padding:8px 18px}
+.ledger .stat:first-child{border-left:0}
+.ledger .big{font-size:26px}
+.hero{--cc:var(--gold);padding:20px}
+.hero .av.lg{width:112px;height:112px}
+.hero .big{font-size:34px;color:var(--gold)}
+.hero .row .row .big{font-size:38px}
+.bar{height:0;border-top:2px dashed var(--line);background:none;margin:16px 0 8px}
+.tag{border-radius:0;border:1px solid #fff5}
+.tl{border-left:2px dashed var(--line)}
+.br:before{border-radius:0}
+.kv div,.stat,.ib,.pr div{border-radius:0}
+.ib{border:2px dashed var(--line);background:transparent}
+.modal{background:#03050fdc}
+.login .big{font-size:26px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media(max-width:560px){.ledger .stat{border-left:0;border-top:2px dashed var(--line)}.ledger .stat:first-child{border-top:0}.hero .row .row .big{font-size:30px}.ptitle{font-size:28px}}
+body{font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0}
+div.big{font-family:"Space Mono",ui-monospace,Menlo,Consolas,monospace;font-weight:700;letter-spacing:-.02em}
+div.big.ptitle,.hero .row>div>div.big:first-child{font-family:"Pixelify Sans","DM Mono",monospace;letter-spacing:0}
+.big.usd,.pk .usd{font-family:"Space Mono",ui-monospace,Menlo,Consolas,monospace;font-weight:700}
+.av.ps{font-size:0;color:transparent}
+/* ===== Imagens de fundo (troque em config.js: BG_DARK / BG_LIGHT) ===== */
+:root{--bgd:url("https://i.pinimg.com/736x/f8/e4/e2/f8e4e212ac94e333db4ecae4fa5f45f1.jpg");--bgl:url("https://i.pinimg.com/736x/66/fc/66/66fc669f6ebc200cd98aa370d1508f0d.jpg")}
+:root[data-theme="dark"] body{background:linear-gradient(rgba(5,8,22,.5),rgba(5,8,22,.72)) fixed,var(--bgd) center/cover no-repeat fixed,#050816}
+:root[data-theme="light"] body{background:linear-gradient(rgba(240,246,255,.4),rgba(240,246,255,.6)) fixed,var(--bgl) center/cover no-repeat fixed,#dbe8f7}
+body:before,body:after{display:none!important}
+:root[data-theme="dark"] .sech,:root[data-theme="dark"] .reft,:root[data-theme="dark"] .ft{text-shadow:0 1px 4px #000}
+/* cabeçalho em 3 colunas: marca | conta | botões */
+header{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center}
+.hl{display:flex;align-items:center;gap:10px;min-width:0}.hr{display:flex;gap:8px;justify-content:flex-end;align-items:center}
+.hc{display:flex;flex-direction:column;align-items:center;line-height:1.25;font-weight:600}.hc .mu{font-size:11px;font-weight:400}
+.ver{font-size:11px;color:var(--mu);border:1px solid var(--line);padding:0 6px}
+/* modais de importar/exportar */
+.how{margin:0;padding-left:18px;font-size:13px}.how li{margin:3px 0}
+.code{background:var(--bg);border:2px dashed var(--line);padding:8px 10px;font:12px/1.5 "DM Mono",monospace;overflow:auto;white-space:pre;margin:6px 0;color:var(--tx)}
+button:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+@media(max-width:720px){header{grid-template-columns:1fr auto}.hc{grid-column:1/-1;order:3;flex-direction:row;gap:8px;justify-content:center}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="config.js"></script>
+<script>
+/* ===== Armazenamento (troque este adaptador por um backend para dados compartilhados na comunidade) ===== */
+const Store={
+  get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},
+  del(k){try{localStorage.removeItem(k)}catch(e){}}
+};
+/* ===== Nuvem (Supabase) =====
+   Os dados do Supabase e os links do rodapé ficam no arquivo config.js (assim você atualiza o index.html sem mexer neles).
+   Sem config.js ou com SB_URL vazio = o site funciona só no navegador. */
+const CFG=window.PIW_CONFIG||{};
+const SB_URL=CFG.SB_URL||"",SB_KEY=CFG.SB_KEY||"";
+const CLOUD=!!(SB_URL&&SB_KEY);
+if(CFG.BG_DARK)document.documentElement.style.setProperty("--bgd","url(\""+CFG.BG_DARK+"\")");
+if(CFG.BG_LIGHT)document.documentElement.style.setProperty("--bgl","url(\""+CFG.BG_LIGHT+"\")");
+async function rpc(fn,args){
+  const h={"Content-Type":"application/json",apikey:SB_KEY};
+  if(SB_KEY.startsWith("eyJ"))h.Authorization="Bearer "+SB_KEY;
+  const r=await fetch(SB_URL.replace(/\/+$/,"")+"/rest/v1/rpc/"+fn,{method:"POST",headers:h,body:JSON.stringify(args)});
+  if(!r.ok)throw new Error("HTTP "+r.status);
+  return r.json();
+}
+const RAR=[[1,"Fraca","#8a8fa3"],[1.1,"Comum","#4caf7d"],[1.3,"Incomum","#3b8bdb"],[1.5,"Rara","#8e5bd9"],[1.7,"Épica","#d94fa8"],[2,"Lendária","#e8892b"],[3,"Mítica","#e5484d"],[4,"Anciã","#1fa3a3"],[99,"Divina","#d4a017"]];
+const rar=q=>{q=+q;if(!q)return["–","#8a8fa3"];for(const[l,n,c]of RAR)if(q<l)return[n,c];return["Divina","#d4a017"]};
+const rt=q=>{const[n,c]=rar(q);return`<span class="tag" style="background:${c}">${n}</span>`};
+const fmt=n=>(+n||0).toLocaleString("pt-BR");
+const q3=n=>(+n||0).toFixed(3);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const usd=n=>"$"+fmt(n);
+const money=(l,k,v,x="")=>`<div><label>${l}</label><div class="mny"><span>$</span><input name="${k}" type="number" step="any" min="0" value="${esc(v)}" ${x}></div></div>`;
+/* Fotos dos Pokémon.
+   PIXEL=true deixa a imagem pixelada (32x32), parecida com a do jogo.
+   Se descobrir o endereço das imagens do próprio jogo, preencha GAME_SPRITE, por exemplo:
+   "https://poke.idleworld.online/assets/pokemon/{id}.png"   ({id} = número da Pokédex, {name} = nome em minúsculas) */
+const PIXEL=false,GAME_SPRITE="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{id}.png",PXM=GAME_SPRITE?"g":"o";
+const IMG=Store.get("piw_img2")||{},PX=Store.get("piw_px")||{};
+const slug=n=>String(n||"").trim().toLowerCase().replace(/♀/g,"-f").replace(/♂/g,"-m").replace(/[.'’:]/g,"").replace(/\s+/g,"-");
+const spriteUrl=async k=>{const r=await fetch("https://pokeapi.co/api/v2/pokemon/"+encodeURIComponent(k));if(r.status===404)return"";if(!r.ok)throw 0;const j=await r.json();return(j.sprites.other&&j.sprites.other["official-artwork"].front_default)||j.sprites.front_default||""};
+const srcOf=k=>{const u=IMG[k];if(!u)return"";if(GAME_SPRITE){const m=u.match(/\/(\d+)\.(png|gif)$/);return m?GAME_SPRITE.replace("{id}",m[1]).replace("{name}",k):u}return u};
+/* reduz a imagem para 32x32, recorta as margens e deixa as bordas "serrilhadas" (pixel art) */
+function pixelate(url){return new Promise(res=>{const im=new Image();im.crossOrigin="anonymous";im.onerror=()=>res("");
+  im.onload=()=>{try{
+    const W=im.naturalWidth,H=im.naturalHeight,c0=document.createElement("canvas");c0.width=W;c0.height=H;const x0=c0.getContext("2d");x0.drawImage(im,0,0);
+    let bx=0,by=0,bw=W,bh=H;
+    try{const d=x0.getImageData(0,0,W,H).data;let a=W,b=H,c=0,e=0;for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(d[(y*W+x)*4+3]>20){if(x<a)a=x;if(x>c)c=x;if(y<b)b=y;if(y>e)e=y}if(c>=a){bx=a;by=b;bw=c-a+1;bh=e-b+1}}catch(e){}
+    const S=Math.max(bw,bh),M=96,m=document.createElement("canvas");m.width=m.height=M;const xm=m.getContext("2d");xm.imageSmoothingEnabled=true;xm.imageSmoothingQuality="high";
+    const sc=(M-6)/S,dw=bw*sc,dh=bh*sc;xm.drawImage(im,bx,by,bw,bh,(M-dw)/2,(M-dh)/2,dw,dh);
+    const N=32,c=document.createElement("canvas");c.width=c.height=N;const x=c.getContext("2d");x.imageSmoothingEnabled=true;x.imageSmoothingQuality="high";x.drawImage(m,0,0,N,N);
+    const id=x.getImageData(0,0,N,N),d=id.data;for(let i=3;i<d.length;i+=4)d[i]=d[i]>110?255:0;x.putImageData(id,0,0);
+    res(c.toDataURL("image/png"));
+  }catch(e){res("")}};
+  im.src=url})}
+const imgTag=(u,n,px)=>{const fb=IMG[slug(n)]||"";return`<img class="${(px||GAME_SPRITE)?"px":""}" src="${esc(u)}" alt="${esc(n)}"${fb&&fb!==u?` data-fb="${esc(fb)}"`:""} onerror="var f=this.dataset.fb;if(f){this.removeAttribute('data-fb');this.classList.remove('px');this.src=f}else{this.parentNode.textContent=this.alt.charAt(0).toUpperCase()}">`};
+const spr=(n,cls="")=>{const k=slug(n),px=PIXEL&&PX[k+PXM],u=px||srcOf(k);return`<span class="av ${cls}" data-pk="${esc(n)}">${u?imgTag(u,n,!!px):esc((n||"?").charAt(0).toUpperCase())}</span>`};
+const busy={};
+async function hydrate(){
+  const ks=[...new Set([...document.querySelectorAll("[data-pk]")].filter(e=>!e.querySelector("img")).map(e=>slug(e.dataset.pk)))].filter(k=>k&&!busy[k]);
+  for(const k of ks){busy[k]=1;
+    try{
+      if(IMG[k]===undefined){IMG[k]=await spriteUrl(k);Store.set("piw_img2",IMG)}
+      const u=srcOf(k);
+      if(u&&PIXEL&&PX[k+PXM]===undefined){PX[k+PXM]=await pixelate(u);Store.set("piw_px",PX)}
+      const px=PIXEL&&PX[k+PXM],show=px||u;
+      if(show)document.querySelectorAll("[data-pk]").forEach(e=>{if(slug(e.dataset.pk)===k)e.innerHTML=imgTag(show,e.dataset.pk,!!px)});
+    }catch(x){}
+    delete busy[k];
+  }
+}
+/* Lista de nomes para os campos de Pokémon (PokeAPI; a Pokepedia carrega por JavaScript e não dá para ler direto) */
+let NAMES=Store.get("piw_names")||[];
+async function loadNames(){if(NAMES.length)return;try{const r=await fetch("https://pokeapi.co/api/v2/pokemon-species?limit=2000");const j=await r.json();NAMES=j.results.map(x=>x.name.split("-").map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(" "));Store.set("piw_names",NAMES)}catch(e){}}
+const STONES=["Ancient Stone","Cocoon Stone","Crystal Stone","Darkness Stone","Earth Stone","Enigma Stone","Feather Stone","Fire Stone","Heart Stone","Ice Stone","Leaf Stone","Metal Stone","Punch Stone","Rock Stone","Thunder Stone","Venom Stone","Water Stone","Moon Stone","Sun Stone","Rough Gemstone"];
+const stoneImg=n=>n?`<img class="sti" alt="" src="https://poke.idleworld.online/assets/items/${slug(n).replace(/-/g,"_")}.gif" onerror="this.style.display='none'">`:"";
+const uid=()=>Math.random().toString(36).slice(2,9);
+const today=()=>{const d=new Date();return String(d.getDate()).padStart(2,"0")+"-"+String(d.getMonth()+1).padStart(2,"0")+" / "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")};
+const sha=async t=>{try{const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}catch(e){return t}};
+
+/* ===== Lógica da planilha ===== */
+const stC=b=>(b.stones||[]).reduce((t,x)=>t+(x.bought?(+x.qty||0)*(+x.price||0):0),0);
+const mig=d=>{d.projects.forEach(p=>{p.breeds.forEach(b=>{if(!b.stones){b.stones=[{type:b.stoneType||"Heart Stone",bought:!!b.stoneBought,qty:b.stoneQty||0,price:b.stonePrice||0}];delete b.stoneType;delete b.stoneBought;delete b.stoneQty;delete b.stonePrice}
+  /* conserta breeds finalizados cuja stone perdeu o "comprada" ao salvar o resultado */
+  if(b.status==="Finalizado")b.stones.forEach(x=>{if(!x.bought&&+x.qty>0&&+x.price>0)x.bought=true})});
+  if(p.stone===undefined){p.stone=p.breeds.flatMap(b=>b.stones||[]).map(x=>x.type).find(Boolean)||""}
+  if(p.stone)p.breeds.forEach(b=>(b.stones||[]).forEach(x=>{if(!x.type)x.type=p.stone}))});return d};
+const loadData=u=>{const raw=Store.get("piw_data_"+u);if(raw&&!Store.get("piw_bk2_"+u))Store.set("piw_bk2_"+u,raw);return mig(raw||{projects:[]})};
+const cost=b=>(+b.fixed||0)+(b.method!=="Grátis"&&b.feroBought?(+b.feroQty||0)*(+b.feroPrice||0):0)+(b.foodBought?(+b.foodPrice||0):0)+stC(b);
+const done=p=>p.breeds.filter(b=>b.status==="Finalizado"&&+b.rQ);
+const cur=p=>{const d=done(p);const l=d[d.length-1];return l?{iv:l.rIV,q:l.rQ}:{iv:p.startIV,q:p.startQ}};
+const totalCost=p=>p.breeds.filter(b=>b.status==="Finalizado").reduce((s,b)=>s+cost(b),0);
+/* ===== Análises ===== */
+const sum=a=>a.reduce((s,x)=>s+x,0),avg=a=>a.length?sum(a)/a.length:0,mnA=a=>a.length?Math.min(...a):0,mxA=a=>a.length?Math.max(...a):0;
+const fin=p=>p.breeds.filter(b=>b.status==="Finalizado");
+const finI=p=>p.breeds.map((b,i)=>({b,n:i+1})).filter(x=>x.b.status==="Finalizado");
+const foodC=b=>b.foodBought?(+b.foodPrice||0):0;
+const feroC=b=>b.method!=="Grátis"&&b.feroBought?(+b.feroQty||0)*(+b.feroPrice||0):0;
+const addC=b=>foodC(b)+stC(b);
+const gainB=b=>Math.round(((+b.rQ||0)-(+b.tQ||0))*1000)/1000;
+const gainsOf=bs=>bs.filter(b=>+b.rQ).map(gainB);
+const catT=bs=>({fix:sum(bs.map(b=>+b.fixed||0)),food:sum(bs.map(foodC)),st:sum(bs.map(stC)),fero:sum(bs.map(feroC))});
+const hist=gs=>{const m={};gs.forEach(g=>m[g]=(m[g]||0)+1);return Object.keys(m).map(k=>({g:+k,c:m[k]})).sort((a,b)=>a.g-b.g)};
+const bestH=h=>h.length?h.reduce((a,x)=>x.g>a.g?x:a):null;
+const commonH=h=>h.length?h.reduce((a,x)=>(x.c>a.c||(x.c===a.c&&x.g>a.g))?x:a):null;
+const G=()=>{const ps=S.data.projects,rows=[];ps.forEach(p=>finI(p).forEach(x=>rows.push({p,b:x.b,n:x.n})));return{ps,rows}};
+const pst=p=>[p.stone,p.stone2].filter(Boolean);
+const stOf=(p,x)=>{const a=pst(p);return a.includes(x.type)?x.type:(a[0]||x.type||"")};
+const stBuys=(p,t)=>{const r=[];p.breeds.forEach((b,i)=>(b.stones||[]).forEach(x=>{if(x.bought&&+x.price>0&&(!t||stOf(p,x)===t))r.push({n:i+1,qty:+x.qty||0,price:+x.price})}));return r};
+const foodBuys=p=>p.breeds.map((b,i)=>({n:i+1,qty:1,price:+b.foodPrice||0,ok:b.foodBought})).filter(x=>x.ok&&x.price>0);
+const pstat=(r,w)=>{if(!r.length)return{n:0};const ps=r.map(x=>x.price),wq=w&&r.some(x=>x.qty>0),q=wq?sum(r.map(x=>x.qty)):r.length,tot=sum(r.map(x=>(wq?x.qty:1)*x.price));return{n:r.length,min:Math.min(...ps),max:Math.max(...ps),avg:Math.round(tot/q),last:r[r.length-1].price}};
+const CH_FREE=[[.5,.005],[.35,.010],[.12,.020],[.03,.040]],CH_FERO=[[.5,.15],[.3,.20],[.15,.25],[.05,.30]];
+
+const LINK_AJUDE=CFG.LINK_AJUDE||"https://exemplo.com/ajude-o-projeto",LINK_CONTATO=CFG.LINK_CONTATO||"https://exemplo.com/contato";
+const VERSION="v2.0.1";
+const foot=()=>`<footer class="ft">Desenvolvido por Niroo · <a href="${LINK_AJUDE}" target="_blank" rel="noopener">Ajude o projeto</a> · <a href="${LINK_CONTATO}" target="_blank" rel="noopener">Contato</a></footer>`;
+let S={user:null,data:{projects:[]}},ui={modal:null,err:"",hideDone:!!Store.get("piw_hide"),hideAn:!!Store.get("piw_hideAn")};
+const isDark=()=>{const t=document.documentElement.getAttribute("data-theme");return t?t==="dark":true};
+const SYNC={ok:"☁ salvo",saving:"☁ salvando…",err:"⚠ sem conexão — salvo só neste aparelho",auth:"⚠ sessão expirada — saia e entre de novo"};
+function setSync(k){S.sync=k;const e=document.getElementById("syncst");if(e)e.textContent=CLOUD?(SYNC[k]||""):""}
+let _pt=null,_ver=0;
+const save=()=>{Store.set("piw_data_"+S.user,S.data);if(CLOUD&&S.token){_ver++;S.dirty=1;setSync("saving");clearTimeout(_pt);_pt=setTimeout(push,600)}};
+async function push(){
+  if(!CLOUD||!S.token)return;const v=_ver;
+  try{const r=await rpc("piw_save",{p_nick:S.user,p_token:S.token,p_data:S.data});
+    if(r.status==="ok"){S.rev=r.updated_at;if(v===_ver){S.dirty=0;setSync("ok")}else push()}else setSync("auth")}
+  catch(e){setSync("err")}
+}
+window.addEventListener("online",()=>{if(S.dirty)push()});
+document.addEventListener("visibilitychange",async()=>{
+  if(document.visibilityState!=="visible"||!CLOUD||!S.token||S.dirty||ui.modal)return;
+  try{const r=await rpc("piw_load",{p_nick:S.user,p_token:S.token});
+    if(r.status==="ok"&&r.updated_at!==S.rev){S.rev=r.updated_at;S.data=mig(r.data||{projects:[]});Store.set("piw_data_"+S.user,S.data);render()}}catch(e){}
+});
+const P=id=>S.data.projects.find(p=>p.id===id);
+
+/* ===== Login ===== */
+const getSess=()=>{try{const v=JSON.parse(localStorage.getItem("piw_session")||sessionStorage.getItem("piw_session"));return typeof v==="string"?{n:v}:v}catch(e){return null}};
+const clearSess=()=>{try{localStorage.removeItem("piw_session");sessionStorage.removeItem("piw_session")}catch(e){}};
+const setSess=(o,rem)=>{try{const v=JSON.stringify(o);if(rem){localStorage.setItem("piw_session",v);sessionStorage.removeItem("piw_session");localStorage.setItem("piw_lastnick",JSON.stringify(o.n))}else{sessionStorage.setItem("piw_session",v);localStorage.removeItem("piw_session");localStorage.removeItem("piw_lastnick")}}catch(e){}};
+async function login(nick,pin,rem){
+  nick=nick.trim().toLowerCase();ui.nick=nick;ui.rem=rem;
+  if(!nick||!/^\d{4}$/.test(pin)){ui.err="Informe o nick e um PIN de 4 dígitos.";return render()}
+  if(!CLOUD){
+    const users=Store.get("piw_users")||{},h=await sha(nick+":"+pin);
+    if(users[nick]&&users[nick]!==h){ui.err="PIN incorreto para este nick.";return render()}
+    if(!users[nick]){users[nick]=h;Store.set("piw_users",users)}
+    S.user=nick;S.data=loadData(nick);save();setSess({n:nick},rem);ui.err="";location.hash="#/";return render();
+  }
+  const el=document.querySelector(".err");if(el)el.textContent="Conectando…";
+  try{
+    let r=await rpc("piw_login",{p_nick:nick,p_pin:pin});
+    if(r.status==="new"){
+      const loc=Store.get("piw_data_"+nick),init=(loc&&Array.isArray(loc.projects))?loc:{projects:[]};
+      const g=await rpc("piw_register",{p_nick:nick,p_pin:pin,p_data:init});
+      if(g.status!=="ok"){ui.err=g.status==="exists"?"Esse nick já existe. Confira o PIN.":"Não foi possível criar a conta.";return render()}
+      r={status:"ok",token:g.token,data:init,updated_at:g.updated_at};
+    }
+    if(r.status==="bad_pin"){ui.err="PIN incorreto."+(r.left!=null?" Tentativas restantes: "+r.left+".":"");return render()}
+    if(r.status==="locked"){ui.err="Muitas tentativas erradas. Tente de novo em alguns minutos.";return render()}
+    if(r.status!=="ok"){ui.err="Não foi possível entrar.";return render()}
+    S.user=nick;S.token=r.token;S.rev=r.updated_at;S.data=mig(r.data||{projects:[]});S.dirty=0;
+    Store.set("piw_data_"+nick,S.data);setSess({n:nick,t:r.token},rem);ui.err="";location.hash="#/";setSync("ok");render();
+    /* conta vazia na nuvem, mas com dados antigos neste aparelho: oferece enviar */
+    const loc=Store.get("piw_bk2_"+nick)||null;
+    if(!(S.data.projects||[]).length&&loc&&Array.isArray(loc.projects)&&loc.projects.length&&confirm("Encontrei dados salvos neste aparelho. Enviar para a nuvem?")){S.data=mig(loc);save();render()}
+  }catch(e){ui.err="Sem conexão com o servidor. Tente novamente.";render()}
+}
+const logout=()=>{clearSess();S.user=null;S.token=null;render()};
+
+/* ===== Views ===== */
+function render(){
+  const a=document.getElementById("app");
+  if(!S.user){a.innerHTML=`<button class="sm themebtn" data-act="theme" title="Alternar modo claro/escuro" style="position:fixed;top:12px;right:12px">${isDark()?"☀️":"🌙"}</button><div class="login card"><div class="big"><img class="pball" src="ICO.png" alt=""> Breeding Tracker</div><p class="mu">Poke Idle World · use seu nick do jogo e um PIN de 4 dígitos. Nick novo cria a conta automaticamente.</p>
+  <label>Nick do jogo</label><input id="nick" autocomplete="username" value="${esc(ui.nick||Store.get("piw_lastnick")||"")}"><label>PIN (4 dígitos)</label><input id="pin" type="password" inputmode="numeric" maxlength="4" autocomplete="current-password">
+  <label class="chk"><input type="checkbox" id="rem" ${ui.rem===false?"":"checked"}> Salvar login neste aparelho</label>
+  <div class="err">${ui.err}</div><button class="pri" style="width:100%" data-act="login">Entrar</button></div>${foot()}`;return}
+  const m=location.hash.match(/^#\/p\/(\w+)/),p=m&&P(m[1]);
+  a.innerHTML=`<header><div class="hl"><b data-act="home"><img class="pball" src="ICO.png" alt=""> Breeding Tracker</b><span class="ver">${VERSION}</span></div><div class="hc"><span>${esc(S.user)}</span><span class="mu" id="syncst">${CLOUD?esc(SYNC[S.sync]||""):""}</span></div>
+  <div class="hr"><button class="sm themebtn" data-act="theme" title="Alternar modo claro/escuro">${isDark()?"☀️":"🌙"}</button><button class="sm" data-act="export">Exportar</button><button class="sm" data-act="import">Importar</button><button class="sm" data-act="logout">Sair</button></div></header>
+  <main>${p?detail(p):home()}</main>${foot()}${ui.modal?modal():""}`;
+  hydrate();
+}
+/* ===== Gráficos SVG (sem bibliotecas) ===== */
+const CAT=[{l:"Custo fixo",c:"#3b5bdb"},{l:"Food",c:"#d98a00"},{l:"Stones",c:"#8e5bd9"},{l:"Feromônio",c:"#2f9e6b"}];
+const COL=["#3b5bdb","#e5484d","#2f9e6b","#d98a00","#8e5bd9","#1fa3a3","#d94fa8","#8a8fa3"];
+const short=n=>n>=1e6?(n/1e6).toFixed(n>=1e7?0:1).replace(".",",")+"M":n>=1e3?Math.round(n/1e3)+"k":String(Math.round(n));
+const sg=n=>(n>0?"+":"")+q3(n);
+const noData='<div class="mu" style="padding:14px 0">Sem dados ainda</div>';
+const lg=a=>`<div class="chips lg" style="margin-top:8px">${a.map(x=>`<span><i style="background:${x.c}"></i>${esc(x.l)}</span>`).join("")}</div>`;
+function donut(it,sz){const t=sum(it.map(x=>x.v));if(!t)return noData;const r=38,C=2*Math.PI*r;let off=0;
+  return`<svg viewBox="0 0 100 100" width="${sz||64}" height="${sz||64}" style="display:block;margin:0 auto"><g transform="rotate(-90 50 50)" fill="none" stroke-width="18">${it.filter(x=>x.v>0).map(x=>{const d=x.v/t*C,o=`<circle cx="50" cy="50" r="${r}" stroke="${x.c}" stroke-dasharray="${d} ${C-d}" stroke-dashoffset="${-off}"><title>${esc(x.l)}: ${esc(x.f??x.v)} (${Math.round(x.v/t*100)}%)</title></circle>`;off+=d;return o}).join("")}</g></svg>`}
+function bars(it,big){if(!it.length)return noData;const W=big?600:200,H=big?230:54,top=big?18:2,bot=big?22:0,n=it.length,gap=big?8:3,bw=Math.min(big?70:24,Math.max(2,(W-gap*(n-1))/n)),ph=H-top-bot,m=Math.max(...it.map(x=>x.v),1e-9);let x=(W-(bw*n+gap*(n-1)))/2,o="";
+  it.forEach(a=>{const h=a.v>0?Math.max(2,a.v/m*ph):0,y=top+ph-h;o+=`<rect x="${x}" y="${y}" width="${bw}" height="${h}" rx="2" fill="${a.c||"var(--ac2)"}"><title>${esc(a.t||a.l+": "+a.v)}</title></rect>`;
+    if(big)o+=`<text x="${x+bw/2}" y="${y-4}" text-anchor="middle" font-size="10" fill="var(--mu)">${esc(a.f??short(a.v))}</text><text x="${x+bw/2}" y="${H-6}" text-anchor="middle" font-size="10" fill="var(--mu)">${esc(String(a.l).slice(0,9))}</text>`;x+=bw+gap});
+  return`<svg viewBox="0 0 ${W} ${H}" width="100%" ${big?"":`height="${H}" preserveAspectRatio="none"`} style="display:block">${o}</svg>`}
+function line(it,big,fm){if(!it.length)return noData;const W=big?600:200,H=big?230:54,pad=big?26:4,bot=big?14:0,n=it.length,vs=it.map(x=>x.v),lo=Math.min(...vs),hi=Math.max(...vs),rg=(hi-lo)||1;
+  const X=i=>pad+(n>1?i*(W-2*pad)/(n-1):(W-2*pad)/2),Y=v=>pad+(1-(v-lo)/rg)*(H-2*pad-bot);
+  let o=`<polyline fill="none" stroke="var(--ac2)" stroke-width="${big?2.5:2}" ${big?"":'vector-effect="non-scaling-stroke"'} points="${it.map((a,i)=>X(i)+","+Y(a.v)).join(" ")}"/>`;
+  if(big)it.forEach((a,i)=>{o+=`<circle cx="${X(i)}" cy="${Y(a.v)}" r="4" fill="var(--ac2)"><title>${esc(a.t||a.l)}</title></circle><text x="${X(i)}" y="${Y(a.v)-8}" text-anchor="middle" font-size="10" fill="var(--mu)">${esc(fm?fm(a.v):short(a.v))}</text><text x="${X(i)}" y="${H-3}" text-anchor="middle" font-size="10" fill="var(--mu)">${esc(a.l)}</text>`});
+  return`<svg viewBox="0 0 ${W} ${H}" width="100%" ${big?"":`height="${H}" preserveAspectRatio="none"`} style="display:block">${o}</svg>`}
+function candles(it,big){if(!it.length)return noData;const W=big?600:200,H=big?250:54,pl=big?44:3,pad=big?18:3,bot=big?16:0,n=it.length,all=it.flatMap(x=>[x.o,x.c]),lo=Math.min(...all),hi=Math.max(...all),rg=(hi-lo)||.01,slot=(W-pl-pad)/n,bw=Math.min(big?34:12,slot*.6);
+  const Y=v=>pad+(1-(v-lo)/rg)*(H-2*pad-bot);let o=big?`<text x="2" y="${Y(hi)+4}" font-size="10" fill="var(--mu)">${q3(hi)}</text><text x="2" y="${Y(lo)+4}" font-size="10" fill="var(--mu)">${q3(lo)}</text>`:"";
+  it.forEach((a,i)=>{const cx=pl+i*slot+slot/2,up=a.c>a.o,c=up?"var(--ok)":a.c<a.o?"var(--ac)":"var(--mu)",y1=Y(Math.max(a.o,a.c)),h=Math.max(2,Math.abs(Y(a.o)-Y(a.c)));
+    o+=`<rect x="${cx-bw/2}" y="${y1}" width="${bw}" height="${h}" rx="2" fill="${c}"><title>Breed ${esc(a.l)}: ${q3(a.o)} → ${q3(a.c)}</title></rect>`;if(big)o+=`<text x="${cx}" y="${H-3}" text-anchor="middle" font-size="10" fill="var(--mu)">${esc(a.l)}</text>`});
+  return`<svg viewBox="0 0 ${W} ${H}" width="100%" ${big?"":`height="${H}" preserveAspectRatio="none"`} style="display:block">${o}</svg>`}
+function stack(cols,keys){if(!cols.length||!cols.some(c=>sum(c.p)>0))return noData;const W=600,H=240,top=18,bot=22,n=cols.length,gap=8,bw=Math.max(4,(W-gap*(n-1))/n),ph=H-top-bot,m=Math.max(...cols.map(c=>sum(c.p)),1);let x=0,o="";
+  cols.forEach(c=>{let y=top+ph;c.p.forEach((v,j)=>{const h=v/m*ph;y-=h;if(h>0)o+=`<rect x="${x}" y="${y}" width="${bw}" height="${h}" fill="${keys[j].c}"><title>${esc(c.l)} · ${esc(keys[j].l)}: ${usd(v)}</title></rect>`});
+    o+=`<text x="${x+bw/2}" y="${y-4}" text-anchor="middle" font-size="10" fill="var(--mu)">${short(sum(c.p))}</text><text x="${x+bw/2}" y="${H-6}" text-anchor="middle" font-size="10" fill="var(--mu)">${esc(String(c.l).slice(0,9))}</text>`;x+=bw+gap});
+  return`<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block">${o}</svg>`}
+const hbar=a=>{const t=sum(a.map(x=>x.v));if(!t)return noData;return`<div style="display:flex;height:16px;border-radius:8px;overflow:hidden;margin-top:8px;background:var(--line)">${a.filter(x=>x.v>0).map(x=>`<span class="seg" title="${esc(x.l)}: ${usd(x.v)}" style="width:${x.v/t*100}%;background:${x.c}"></span>`).join("")}</div>${lg(a.map(x=>({l:x.l+" "+Math.round(x.v/t*100)+"%",c:x.c})))}`};
+const qpts=(p,fi)=>[{v:+p.startQ,l:"Início",t:"Início: "+q3(p.startQ)},...fi.filter(x=>+x.b.rQ).map(x=>({v:+x.b.rQ,l:"#"+x.n,t:"Breed "+x.n+": "+q3(x.b.rQ)}))];
+const histItems=h=>h.map(x=>({l:sg(x.g),v:x.c,f:x.c+"×",t:sg(x.g)+": "+x.c+"×",c:x.g>0?"var(--ok)":"var(--mu)"}));
+const histDonut=h=>h.map((x,i)=>({l:sg(x.g),v:x.c,c:COL[i%COL.length],f:x.c+"×"}));
+const tbl=(h,r)=>`<div class="wrap" style="margin-top:12px"><table><tr>${h.map(x=>`<th>${x}</th>`).join("")}</tr>${r.map(x=>`<tr>${x.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</table></div>`;
+const kvs=a=>`<div class="stats">${a.map(([l,v])=>`<div class="stat"><div class="lbl">${l}</div><div class="big" style="font-size:18px">${v}</div></div>`).join("")}</div>`;
+const cm=(t,body,sub)=>`<div class="modal"><div class="card cw"><div class="row"><div><b class="big">${t}</b>${sub?`<div class="mu">${sub}</div>`:""}</div><span class="sp"></span><button class="sm" data-act="close">✕ Fechar</button></div><div style="margin-top:14px">${body}</div></div></div>`;
+const CC={g_cat:"#a58bff",g_cost:"#ff9a3c",g_add:"#5aa9ff",g_avg:"#ffd23f",g_gain:"#ff6fae",g_meth:"#2fd6c4",gain:"#ff6fae",cost:"#ff9a3c",q:"#a58bff",add:"#5aa9ff"},IC={g_cat:"💰",g_cost:"🧮",g_add:"🎒",g_avg:"⚖️",g_gain:"📈",g_meth:"🧪",gain:"🏆",cost:"🧮",q:"📈",add:"🎒"};
+const cc=(k,t,v,sub,ch,id,extra)=>`<div class="card cc" data-act="chart" data-k="${k}"${id?` data-id="${id}"`:""} style="--cc:${CC[k]||"var(--rim)"}"><div class="row cch"><span class="ict">${IC[k]||"📊"}</span><div class="lbl">${t}</div></div><div class="big">${v}</div><div class="mu sub2">${sub}</div><div class="mini">${ch}</div>${extra||""}</div>`;
+
+function chartModal(k,pid){
+  const kk=k.split("|"),ts=kk[1]||"";k=kk[0];
+  const p=pid?P(pid):null,{ps,rows}=G();
+  if(k==="g_cat"){const T=catT(rows.map(r=>r.b)),v=[T.fix,T.food,T.st],tot=sum(v),it=CAT.slice(0,3).map((c,i)=>({l:c.l,c:c.c,v:v[i],f:usd(v[i])}));
+    return cm("Composição dos gastos",donut(it,200)+lg(it.map(x=>({l:`${x.l} ${usd(x.v)} (${tot?Math.round(x.v/tot*100):0}%)`,c:x.c})))+tbl(["Pokémon","Fixo","Food","Stones","Total"],ps.map(q=>{const t=catT(fin(q));return[esc(q.name),usd(t.fix),usd(t.food),usd(t.st),`<b>${usd(t.fix+t.food+t.st)}</b>`]})),"Considera só breeds finalizados.")}
+  if(k==="g_cost"){const per=ps.map(q=>{const b=fin(q);return{q,n:b.length,a:Math.round(avg(b.map(cost)))}}).filter(x=>x.n),cs=rows.map(r=>cost(r.b));
+    return cm("Custo por breed",bars(per.map(x=>({l:x.q.name,v:x.a,t:x.q.name+": "+usd(x.a)+" em média"})),1)+kvs([["Média",usd(Math.round(avg(cs)))],["Mais barato",usd(mnA(cs))],["Mais caro",usd(mxA(cs))]])+`<div class="lbl">Breeds mais caros</div>`+tbl(["Pokémon","Breed","Custo"],rows.slice().sort((a,b)=>cost(b.b)-cost(a.b)).slice(0,5).map(r=>[esc(r.p.name),"#"+r.n,usd(cost(r.b))])),"Média de custo por breed de cada Pokémon.")}
+  if(k==="g_add"){const K=CAT.slice(1,3);return cm("Gastos adicionais",stack(ps.map(q=>{const t=catT(fin(q));return{l:q.name,p:[t.food,t.st]}}),K)+lg(K)+tbl(["Pokémon","Food","Stones","Total"],ps.map(q=>{const t=catT(fin(q));return[esc(q.name),usd(t.food),usd(t.st),`<b>${usd(t.food+t.st)}</b>`]})),"Food e stones comprados, além do custo fixo.")}
+  if(k==="g_avg"){const T=catT(rows.map(r=>r.b)),N=rows.length||1,per=ps.map(q=>{const b=fin(q);return{q,n:b.length,a:Math.round(avg(b.map(addC)))}}).filter(x=>x.n);
+    return cm("Média de gasto adicional por breed",bars(per.map(x=>({l:x.q.name,v:x.a,t:x.q.name+": "+usd(x.a)})),1)+kvs([["Total por breed",usd(Math.round((T.food+T.st)/N))],["Food por breed",usd(Math.round(T.food/N))],["Stones por breed",usd(Math.round(T.st/N))]]),"Média de cada Pokémon e média geral.")}
+  if(k==="g_gain"||k==="gain"){const bs=k==="gain"?fin(p):rows.map(r=>r.b),gs=gainsOf(bs),h=hist(gs),B=bestH(h),C=commonH(h),t=gs.length;
+    return cm(k==="gain"?"Ganhos de "+esc(p.name):"Distribuição de ganhos",bars(histItems(h),1)+kvs([["Melhor ganho",B?sg(B.g)+` <span class="mu">(${B.c}×)</span>`:"–"],["Mais comum",C?sg(C.g)+` <span class="mu">(${C.c}×)</span>`:"–"],["Ganho médio",sg(avg(gs))]])+tbl(["Ganho","Vezes","%"],h.slice().reverse().map(x=>[sg(x.g),x.c+"×",Math.round(x.c/t*100)+"%"])),t+" breeds com resultado.")}
+  if(k==="g_meth"){const M=["Grátis","Feromônio"].map(m=>{const b=rows.filter(r=>r.b.method===m).map(r=>r.b),g=sum(gainsOf(b));return{m,n:b.length,c:Math.round(avg(b.map(cost))),g:b.length?g/b.length:0,pm:g>0?Math.round(sum(b.map(cost))/(g*1000)):0}});
+    return cm("Grátis vs Feromônio",donut(M.map((x,i)=>({l:x.m,v:x.n,c:COL[i*2],f:x.n+" breeds"})),200)+lg(M.map((x,i)=>({l:x.m+" · "+x.n,c:COL[i*2]})))+tbl(["Método","Breeds","Custo médio","Ganho médio","Custo por +0,001"],M.map(x=>[x.m,x.n,usd(x.c),sg(x.g),x.pm?usd(x.pm):"–"])),"Qual método está compensando mais.")}
+  if(!p)return"";
+  const fi=finI(p),f=fin(p);
+  if(k==="cost"){const cs=f.map(cost);return cm("Custo por breed · "+esc(p.name),bars(fi.map(x=>({l:"#"+x.n,v:cost(x.b),t:"Breed "+x.n+": "+usd(cost(x.b))})),1)+kvs([["Média",usd(Math.round(avg(cs)))],["Mais barato",usd(mnA(cs))],["Mais caro",usd(mxA(cs))]])+tbl(["Breed","Método","Ganho","Custo"],fi.map(x=>["#"+x.n,x.b.method,+x.b.rQ?sg(gainB(x.b)):"–",usd(cost(x.b))])))}
+  if(k==="q")return cm("Evolução da qualidade · "+esc(p.name),line(qpts(p,fi),1,q3)+kvs([["Inicial",q3(p.startQ)],["Atual",q3(cur(p).q)],["Ganho",sg(cur(p).q-p.startQ)]]),"Qualidade ao final de cada breed.");
+  if(k==="add"){const K=CAT.slice(1,3),T=catT(f);return cm("Gastos adicionais · "+esc(p.name),stack(fi.map(x=>({l:"#"+x.n,p:[foodC(x.b),stC(x.b)]})),K)+lg(K)+kvs([["Total",usd(T.food+T.st)],["Foods",usd(T.food)],["Stones",usd(T.st)]]))}
+  if(k==="add_food"||k==="add_stone"){const fd=k==="add_food",fn=fd?foodC:stC,vs=f.map(fn);return cm((fd?"Foods":"Stones")+" · "+esc(p.name),bars(fi.map(x=>({l:"#"+x.n,v:fn(x.b),t:"Breed "+x.n+": "+usd(fn(x.b))})),1)+kvs([["Total",usd(sum(vs))],["Média por breed",usd(Math.round(avg(vs)))],["Breeds com compra",vs.filter(v=>v>0).length+" de "+vs.length]]))}
+  if(k==="price_stone"||k==="price_food"){const sk=k==="price_stone",r=sk?stBuys(p,ts):foodBuys(p),st=pstat(r,sk);
+    return cm((sk?"Preço da stone"+(ts?" · "+esc(ts):""):"Preço das foods")+" · "+esc(p.name),line(r.map(x=>({v:x.price,l:"#"+x.n,t:"Breed "+x.n+": "+usd(x.price)})),1)+(st.n?kvs([["Mínimo",usd(st.min)],["Média",usd(st.avg)],["Máximo",usd(st.max)],["Último",usd(st.last)]])+tbl(sk?["Breed","Qtd","Valor (un)","Total"]:["Breed","Valor"],r.map(x=>sk?["#"+x.n,x.qty,usd(x.price),usd(x.qty*x.price)]:["#"+x.n,usd(x.price)])):""),sk?"Valor por unidade; a média considera a quantidade comprada.":"Valor pago em cada food.")}
+  return"";
+}
+
+function home(){
+  const {ps,rows}=G(),all=ps.reduce((s,p)=>s+totalCost(p),0),n=rows.length,gt=sum(ps.map(p=>cur(p).q-p.startQ)),T=catT(rows.map(r=>r.b)),addT=T.food+T.st,
+    bs=rows.map(r=>r.b),h=hist(gainsOf(bs)),B=bestH(h),gs=gainsOf(bs),
+    per=ps.map(q=>({q,b:fin(q)})).filter(x=>x.b.length),M=["Grátis","Feromônio"].map(m=>rows.filter(r=>r.b.method===m).length);
+  return`<div class="row" style="flex-wrap:wrap"><div><div class="big ptitle">Meus breedings</div><div class="mu">Escolha um Pokémon para ver o histórico ou cadastre um novo.</div></div><span class="sp"></span><button class="pri" data-act="newp">+ Novo Pokémon</button></div>
+  ${ps.length?`<div class="parade">${ps.slice(0,6).map(q=>spr(q.name,"ps")).join("")}</div>`:""}
+  <div class="stats ledger"><div class="stat"><div class="lbl">Pokémon</div><div class="big">${ps.length}</div></div>
+  <div class="stat"><div class="lbl">Breeds finalizados</div><div class="big">${n}</div></div>
+  <div class="stat"><div class="lbl">Gasto total</div><div class="big usd">${usd(all)}</div></div>
+  <div class="stat"><div class="lbl">Qualidade ganha</div><div class="big up">${sg(gt)}</div></div></div>
+  ${ps.length?`<div class="grid">${ps.map(pc).join("")}</div>`:`<div class="card" style="text-align:center"><p>Nenhum Pokémon ainda.</p><button class="pri" data-act="newp">Começar um breed</button> <button data-act="demo">Carregar exemplo (Eevee da planilha)</button></div>`}
+  ${n?`<div class="sech">Análises gerais · clique para ver o gráfico</div><div class="cgrid">
+  ${cc("g_cat","Composição dos gastos",usd(T.fix+T.food+T.st),"fixo · food · stones",donut(CAT.slice(0,3).map((c,i)=>({l:c.l,c:c.c,v:[T.fix,T.food,T.st][i],f:usd([T.fix,T.food,T.st][i])})),64))}
+  ${cc("g_cost","Custo por breed",usd(Math.round(all/n)),"média de "+n+" breeds",bars(per.map(x=>({l:x.q.name,v:avg(x.b.map(cost)),t:x.q.name+": "+usd(Math.round(avg(x.b.map(cost))))}))))}
+  ${cc("g_add","Gastos adicionais",usd(addT),"food + stones",hbar([{l:"Food",v:T.food,c:CAT[1].c},{l:"Stones",v:T.st,c:CAT[2].c}]))}
+  ${cc("g_avg","Média de gasto adicional",usd(Math.round(addT/n)),"por breed",bars(per.map(x=>({l:x.q.name,v:avg(x.b.map(addC)),t:x.q.name+": "+usd(Math.round(avg(x.b.map(addC))))}))))}
+  ${cc("g_gain","Ganhos de qualidade",B?sg(B.g):"–",B?`melhor ganho · ${B.c}× · média ${sg(avg(gs))}`:"sem resultados",bars(histItems(h)))}
+  ${cc("g_meth","Grátis vs Feromônio",M[0]+" / "+M[1],"breeds por método",donut([{l:"Grátis",v:M[0],c:COL[0],f:M[0]+" breeds"},{l:"Feromônio",v:M[1],c:COL[2],f:M[1]+" breeds"}],64))}
+  </div>`:""}
+  <div class="reft">Referência rápida</div>
+  <div class="info"><div class="ib"><b>🆓 Chances Grátis</b><div class="chips">${CH_FREE.map(f=>`<span>+${f[1].toFixed(3)} · ${Math.round(f[0]*100)}%</span>`).join("")}</div></div>
+  <div class="ib"><b>🧪 Chances Feromônio</b><div class="chips">${CH_FERO.map(f=>`<span>+${f[1].toFixed(2)} · ${Math.round(f[0]*100)}%</span>`).join("")}</div></div>
+  <div class="ib"><b>💎 Double Stone</b><div class="chips"><span>5% de +1 no IV</span><span>custo fixo padrão: $2.000.000</span></div></div></div>`;
+}
+function pc(p){
+  const c=cur(p),d=fin(p).length,g=c.q-p.startQ;
+  return`<div class="card pk" data-act="open" data-id="${p.id}"><div class="row">${spr(p.name)}<div><b>${esc(p.name)}</b><div class="mu">IV ${p.startIV===c.iv?c.iv:p.startIV+" → "+c.iv} · ${d} breeds</div></div><span class="sp"></span>${rt(c.q)}</div>
+  <div class="row" style="margin-top:12px;flex-wrap:wrap"><div class="ini"><small>Inicial</small>${q3(p.startQ)}</div><span class="arr">→</span><div><div class="lbl" style="font-size:10px">Atual</div><div class="big">${q3(c.q)}</div></div><span class="${g>0?"up":"eq"}">${sg(g)}</span></div>
+  <div class="row" style="margin-top:10px;padding-top:8px;border-top:1px solid var(--line)"><span class="lbl">Gasto total</span><span class="sp"></span><span class="usd">${usd(totalCost(p))}</span></div></div>`;
+}
+function priceCard(k,title,icon,st,sub,items,id){
+  return`<div class="ib cc" data-act="chart" data-k="${k}" data-id="${id}"><b style="display:flex;align-items:center;gap:6px">${icon}<span>${title}</span><span style="font-weight:400">· ${sub}</span><span class="sp"></span><span style="font-weight:400">${st.n} compras</span></b>
+  ${st.n?`<div class="chips"><span>mín ${usd(st.min)}</span><span>média ${usd(st.avg)}</span><span>máx ${usd(st.max)}</span><span>último ${usd(st.last)}</span></div>`:`<span>Nenhuma compra registrada.</span>`}</div>`;
+}
+function detail(p){
+  const c=cur(p),f=fin(p),fi=finI(p),tc=totalCost(p),g=c.q-p.startQ,ivg=c.iv-p.startIV,gs=gainsOf(f),H=hist(gs),B=bestH(H),CM=commonH(H),T=catT(f),addT=T.food+T.st,cs=f.map(cost),
+    sb=pstat(stBuys(p),true),fb=pstat(foodBuys(p),false);
+  const act=p.breeds.map((b,i)=>({b,n:i+1})).filter(x=>x.b.status!=="Finalizado").reverse(),old=p.breeds.map((b,i)=>({b,n:i+1})).filter(x=>x.b.status==="Finalizado").reverse();
+  return`<button class="sm" data-act="home">← Voltar</button>
+  <div class="card hero" style="margin-top:10px"><div class="row" style="flex-wrap:wrap">${spr(p.name,"lg")}<div><div class="big">${esc(p.name)}</div><div class="mu">${p.breeds.length} breeds registrados</div></div><span class="sp"></span>
+  <div class="row" style="gap:28px;align-items:flex-start"><div style="text-align:right"><div class="lbl">IV atual</div><div class="big">${c.iv}</div></div><div style="text-align:right"><div class="lbl">Qualidade atual</div><div class="big">${q3(c.q)}</div>${rt(c.q)}</div></div></div>
+  <div class="bar"></div>
+  <div class="row foot"><div>Qualidade inicial <b>${q3(p.startQ)}</b> ${rt(p.startQ)} → IV inicial <b>${p.startIV}</b></div></div></div>
+  <div class="stats ledger"><div class="stat"><div class="lbl">Diferença</div><div class="big ${g>0?"up":""}">${sg(g)}</div><div class="mu">IV ${ivg>=0?"+":""}${ivg}</div></div>
+  <div class="stat"><div class="lbl">Custo total</div><div class="big usd">${usd(tc)}</div></div>
+  <div class="stat"><div class="lbl">Breeds finalizados</div><div class="big">${f.length}</div><div class="mu">${p.breeds.length} no total</div></div>
+  <div class="stat"><div class="lbl">Custo médio</div><div class="big usd">${usd(f.length?Math.round(tc/f.length):0)}</div><div class="mu">por breed</div></div>
+  <div class="stat"><div class="lbl">Custo por +0,001</div><div class="big usd">${g>0?usd(Math.round(tc/(g*1000))):"–"}</div><div class="mu">de qualidade</div></div></div>
+  <div class="sech row" style="margin-top:26px"><span>Análises${ui.hideAn?"":" · clique para ver o gráfico"}</span><span class="sp"></span><button class="sm" data-act="togan" style="text-transform:none;letter-spacing:0;font-weight:400">${ui.hideAn?"Mostrar":"Ocultar"}</button></div>
+  ${ui.hideAn?"":`
+  <div class="cgrid">
+  ${cc("gain","Melhor breed",B?`<span class="up">${sg(B.g)}</span>`:"–",B?`ocorreu ${B.c}× em ${gs.length} breeds`:"sem resultados",bars(histItems(H)),p.id)}
+  ${cc("gain","Ganho mais comum",CM?sg(CM.g):"–",CM?`${CM.c}× (${Math.round(CM.c/gs.length*100)}% dos breeds)`:"sem resultados",donut(histDonut(H),64),p.id)}
+  ${cc("cost","Custo por breed",usd(Math.round(avg(cs))),`média · mín ${usd(mnA(cs))} · máx ${usd(mxA(cs))}`,bars(fi.map(x=>({l:"#"+x.n,v:cost(x.b),t:"Breed "+x.n+": "+usd(cost(x.b))}))),p.id)}
+  ${cc("q","Evolução da qualidade",sg(g),q3(p.startQ)+" → "+q3(c.q),line(qpts(p,fi),0,q3),p.id)}
+  ${cc("add","Total de custos adicionais",usd(addT),"food + stones",hbar([{l:"Food",v:T.food,c:CAT[1].c},{l:"Stones",v:T.st,c:CAT[2].c}]),p.id,`<div class="opts"><button data-act="chart" data-k="add_food" data-id="${p.id}"><small>🍖 Foods</small><b class="usd">${usd(T.food)}</b></button><button data-act="chart" data-k="add_stone" data-id="${p.id}"><small>💎 Stones</small><b class="usd">${usd(T.st)}</b></button></div>`)}
+  </div>
+  `}
+  <div class="reft">Preços que você já pagou · valor por unidade</div>
+  <div class="info">${(pst(p).length?pst(p):[""]).map(t=>priceCard("price_stone"+(t?"|"+t:""),"Stone","<span style='display:contents'>"+stoneImg(t)+"</span>",pstat(stBuys(p,t),true),esc(t||"stone não definida"),[],p.id)).join("")}
+  ${priceCard("price_food","Foods","🍖",fb,"valor por food",foodBuys(p).map(x=>({v:x.price,l:"#"+x.n})),p.id)}</div>
+  ${!p.stone?`<div class="warn">Defina a stone deste Pokémon em “Editar Pokémon” para ela já vir selecionada nos novos breeds.</div>`:""}
+  <div class="row" style="flex-wrap:wrap;margin-top:26px"><b>Breeds</b><span class="sp"></span><button class="pri" data-act="newb" data-id="${p.id}">+ Novo breed</button><button class="sm" data-act="editp" data-id="${p.id}">Editar Pokémon</button><button class="sm" data-act="delp" data-id="${p.id}">Excluir Pokémon</button></div>
+  <div class="tl" style="margin-top:12px">${act.map(x=>bc(p,x.b,x.n)).join("")||(old.length?'<p class="mu">Nenhum breed em andamento.</p>':'<p class="mu">Nenhum breed registrado ainda. Clique em "+ Novo breed" para começar.</p>')}
+  ${old.length?`<div class="tog"><button class="sm" data-act="togdone">${ui.hideDone?"Mostrar":"Ocultar"} finalizados (${old.length})</button></div>`:""}
+  ${ui.hideDone?"":old.map(x=>bc(p,x.b,x.n)).join("")}</div>`;
+}
+function bc(p,b,n){
+  const g=(+b.rQ||0)-(+b.tQ||0),has=+b.rQ,stT=stC(b),fdT=foodC(b),frT=feroC(b),
+    tip=(b.stones||[]).filter(x=>x.bought).map(x=>(stOf(p,x)||"Stone")+": "+x.qty+"un × "+usd(x.price)).join("\n");
+  return`<div class="br ${b.status}"><div class="card"><div class="row" style="flex-wrap:wrap"><b>Breeding ${n}</b><span class="tag st ${b.status}">${b.status}</span><span class="mu">${esc(b.date)}</span><span class="sp"></span><button class="sm" data-act="resb" data-id="${p.id}" data-b="${b.id}">Resultado</button><button class="sm" data-act="editb" data-id="${p.id}" data-b="${b.id}">Editar</button></div>
+  <div class="kv"><div><small>Pokémon inicial</small>IV ${b.tIV} · ${q3(b.tQ)}</div><div><small>Food ${esc(b.fName||"")}</small>IV ${b.fIV||"–"} · ${b.fQ?q3(b.fQ):"–"}</div><div><small>Resultado</small>${has?`IV ${b.rIV} · ${q3(b.rQ)} <span class="${g>0?"up":"eq"}">${g>0?"+"+q3(g):"±0"}</span>`:"–"}</div>
+  <div><small>Método</small>${b.method}${b.feroBought?" · "+b.feroQty+" fero":""}${b.dbl?" · Double Stone":""}</div>
+  <div><small>Gastos adicionais</small><span class="al"${tip?` title="${esc(tip)}"`:""}>Stones <b>${usd(stT)}</b></span><span class="al">Food <b>${usd(fdT)}</b></span></div>
+  <div><small>Custo</small><b class="usd">${usd(cost(b))}</b></div></div></div></div>`;
+}
+const inp=(l,k,v,t="text",x="")=>`<div><label>${l}</label><input name="${k}" type="${t}" ${t==="number"?'step="any"':""} value="${esc(v)}" ${x}></div>`;
+const sel=(l,k,v,o)=>`<div><label>${l}</label><select name="${k}">${o.map(x=>`<option ${x===v?"selected":""}>${x}</option>`).join("")}</select></div>`;
+function modal(){
+  const m=ui.modal;
+  if(m.t==="c")return chartModal(m.k,m.pid);
+  const dl=`<datalist id="dl-pk">${NAMES.map(n=>`<option value="${esc(n)}">`).join("")}</datalist>`;
+  if(m.t==="x"){const ps=S.data.projects||[],nb=sum(ps.map(q=>(q.breeds||[]).length));
+    return cm("Exportar backup",`<p style="margin-top:0">Baixa um arquivo com <b>todos os dados da sua conta</b>: Pokémon, breeds, gastos e resultados.</p>
+    <div class="stats ledger"><div class="stat"><div class="lbl">Pokémon</div><div class="big">${ps.length}</div></div><div class="stat"><div class="lbl">Breeds</div><div class="big">${nb}</div></div></div>
+    <div class="sech" style="margin:14px 0 6px;font-size:15px">Como o arquivo fica</div>
+    <ul class="how"><li>Nome: <b>breeding-${esc(S.user)}-${new Date().toISOString().slice(0,10)}.json</b></li><li>Formato JSON (texto puro). Você não precisa abrir; só guarde.</li><li>Vai para a pasta de downloads do navegador.</li><li>Não contém o seu PIN.</li></ul>
+    <div class="sech" style="margin:14px 0 6px;font-size:15px">Quando usar</div>
+    <ul class="how"><li>De vez em quando, como cópia de segurança (o ideal é uma vez por semana).</li><li>Antes de importar outro arquivo, para não perder nada.</li><li>Para levar seus dados para outra conta ou aparelho (depois use Importar).</li></ul>
+    <div class="row" style="margin-top:16px"><span class="sp"></span><button data-act="close">Fechar</button><button class="pri" data-act="doexport">Baixar backup</button></div>`)}
+  if(m.t==="i"){const I=ui.imp,ps=S.data.projects||[],nb=sum(ps.map(q=>(q.breeds||[]).length));
+    return cm("Importar backup",`<p style="margin-top:0">Carrega um arquivo <b>.json</b> gerado pelo botão Exportar deste site. Serve para restaurar um backup ou trazer dados de outra conta.</p>
+    <div class="warn" style="margin:8px 0 12px">Importar <b>substitui todos os dados atuais</b> desta conta (hoje: ${ps.length} Pokémon e ${nb} breeds). Em caso de dúvida, exporte um backup antes.</div>
+    <div class="sech" style="margin:6px 0;font-size:15px">Formato esperado</div>
+<pre class="code">{
+  "projects": [
+    {
+      "name": "Eevee",
+      "startIV": 174, "startQ": 1.197,
+      "stone": "Heart Stone",
+      "breeds": [
+        { "status": "Finalizado", "method": "Grátis",
+          "tIV": 174, "tQ": 1.197, "rIV": 174, "rQ": 1.202, ... }
+      ]
+    }
+  ]
+}</pre>
+    <p class="mu">O arquivo precisa ter a lista "projects". Use sempre o arquivo exportado, sem editar à mão.</p>
+    <label>Escolha o arquivo</label><input type="file" id="impf" accept=".json,application/json">
+    ${I?(I.err?`<div class="err" style="margin-top:8px">${esc(I.err)}</div>`:`<div class="ib" style="margin-top:10px">Arquivo <b>${esc(I.name)}</b>: ${I.pk} Pokémon e ${I.br} breeds. Pronto para importar.</div>`):""}
+    <div class="row" style="margin-top:16px"><span class="sp"></span><button data-act="close">Cancelar</button><button class="pri" data-act="doimport" ${I&&!I.err?"":"disabled"}>Substituir meus dados</button></div>`)}
+  if(m.t==="p"){const e=m.edit?P(m.pid):{name:"",startIV:"",startQ:"",stone:"",stone2:""},ss=(n,v,ph)=>`<select name="${n}"><option value="">${ph}</option>${((!v||STONES.includes(v))?STONES:[...STONES,v]).map(o=>`<option ${o===v?"selected":""}>${esc(o)}</option>`).join("")}</select>`;
+    return`<div class="modal"><div class="card"><b class="big">${m.edit?"Editar Pokémon":"Novo Pokémon"}</b><div class="mu">Cadastre o Pokémon que você quer melhorar. Depois é só registrar cada breed.</div>
+  <form data-form="p">${dl}${inp("Nome do Pokémon","name",e.name,"text",'list="dl-pk" autocomplete="off" placeholder="Digite para buscar…"')}
+  <div class="f2">${inp("IV inicial","startIV",e.startIV,"number")}${inp("Qualidade inicial","startQ",e.startQ,"number")}</div>
+  <label>Stone usada neste Pokémon</label><div class="row"><span id="stpv">${stoneImg(e.stone)}</span>${ss("stone",e.stone,"Selecione a stone…")}</div>
+  <label>Segunda stone <span style="text-transform:none">(só se este Pokémon usa 2 tipos)</span></label><div class="row"><span id="stpv2">${stoneImg(e.stone2)}</span>${ss("stone2",e.stone2,"Nenhuma")}</div>
+  <div class="mu" style="margin-top:4px">As stones escolhidas já vêm selecionadas em cada novo breed; lá você só marca se comprou e o valor.</div>
+  <div class="row" style="margin-top:14px"><span class="sp"></span><button type="button" data-act="close">Cancelar</button><button class="pri">${m.edit?"Salvar":"Criar"}</button></div></form></div></div>`}
+  const b=m.b,p=P(m.pid),S_=["Não iniciado","Chocando","Finalizado"],B=v=>v?"Sim":"Não";
+  if(m.t==="r")return`<div class="modal"><div class="card"><b class="big">Resultado · ${esc(b.fName)}</b><div class="mu">Inicial: IV ${b.tIV} · ${q3(b.tQ)}</div>
+  <form data-form="r"><div class="f2">${inp("IV resultante","rIV",b.rIV,"number")}${inp("Qualidade resultante","rQ",b.rQ,"number")}</div><div class="mu" style="margin-top:8px">Ao salvar, o status muda para Finalizado.</div>
+  <div class="row" style="margin-top:14px"><span class="sp"></span><button type="button" data-act="close">Cancelar</button><button class="pri">Salvar resultado</button></div></form></div></div>`;
+  const fero=b.method==="Feromônio";
+  const sec=(n,t,h,body)=>`<div class="sec"><div class="sh"><span class="n">${n}</span><div><b>${t}</b>${h?`<div class="mu">${h}</div>`:""}</div></div>${body}</div>`;
+  const stones=b.stones.map((x,i)=>{const tp=x.type||pst(p)[i]||"";return`<div class="stb"><input type="hidden" name="st_type_${i}" value="${esc(tp)}"><div class="row">${stoneImg(tp)}<b>${esc(tp||"Stone não definida")}</b></div>${tp?"":'<div class="mu">Defina a stone em “Editar Pokémon”.</div>'}
+  <div class="f3">${sel("Comprou?","st_bought_"+i,B(x.bought),["Não","Sim"])}${x.bought?inp("Quantidade","st_qty_"+i,x.qty,"number")+money("Valor (un)","st_price_"+i,x.price):""}</div></div>`}).join("");
+  let n=0;
+  return`<div class="modal"><div class="card"><b class="big">${m.edit?"Editar":"Novo"} breed</b><div class="mu">Preencha antes de chocar. O resultado é registrado depois, pelo botão "Resultado" do breed.</div>
+  <form data-form="b">${dl}
+  ${sec(++n,"Informações do breed","",`<div class="f2">${sel("Status","status",b.status,S_)}${sel("Método","method",b.method,["Grátis","Feromônio"])}</div>${inp("Data / horário","date",b.date)}`)}
+  ${sec(++n,"Pokémon inicial","O Pokémon que você já tem (valores atuais).",`<div class="f2">${inp("IV","tIV",b.tIV,"number")}${inp("Qualidade","tQ",b.tQ,"number")}</div>`)}
+  ${sec(++n,"Food","O Pokémon que será usado como food neste breed.",`<div class="f3">${inp("Nome","fName",b.fName,"text",'list="dl-pk" autocomplete="off"')}${inp("IV","fIV",b.fIV,"number")}${inp("Qualidade","fQ",b.fQ,"number")}</div>`)}
+  ${fero?sec(++n,"Feromônio","",`<div class="f3">${sel("Comprou fero?","feroBought",B(b.feroBought),["Não","Sim"])}${b.feroBought?inp("Quantidade","feroQty",b.feroQty,"number")+money("Valor (un)","feroPrice",b.feroPrice):""}</div>`):""}
+  ${sec(++n,"Gastos adicionais","Tudo em dólar ($). Só preencha o que você comprou.",`
+    <div class="sub"><b>Food</b><div class="f2">${sel("Comprou a food?","foodBought",B(b.foodBought),["Não","Sim"])}${b.foodBought?money("Valor da food","foodPrice",b.foodPrice):""}</div></div>
+    <div class="sub"><b>Stones</b>${sel("Usou Double Stone? (5% de +1 no IV)","dbl",B(b.dbl),["Sim","Não"])}${stones}</div>
+    <div class="fix"><span>Custo fixo por breed (já incluso no custo)</span><b>${usd(b.fixed)}</b></div>`)}
+  <div class="row" style="margin-top:14px">${m.edit?'<button type="button" data-act="delb">Excluir</button>':""}<span class="sp"></span><button type="button" data-act="close">Cancelar</button><button class="pri">Salvar</button></div></form></div></div>`;
+}
+function readForm(f,b){
+  const v=Object.fromEntries(new FormData(f)),o={...b};
+  for(const k of["status","date","method","fName"])if(k in v)o[k]=v[k];
+  for(const k of["tIV","tQ","fIV","fQ","rIV","rQ","feroQty","feroPrice","foodPrice","fixed"])if(k in v)o[k]=v[k]===""?"":+v[k];
+  for(const k of["feroBought","foodBought","dbl"])if(k in v)o[k]=v[k]==="Sim";
+  /* só mexe nas stones quando o formulário realmente tem os campos delas (o modal de resultado não tem) */
+  if(b.stones&&Object.keys(v).some(k=>k.startsWith("st_")))o.stones=b.stones.map((x,i)=>({type:v["st_type_"+i]!==undefined?v["st_type_"+i]:x.type,bought:v["st_bought_"+i]!==undefined?v["st_bought_"+i]==="Sim":!!x.bought,qty:v["st_qty_"+i]!==undefined?+v["st_qty_"+i]||0:x.qty,price:v["st_price_"+i]!==undefined?+v["st_price_"+i]||0:x.price}));
+  return o;
+}
+function keepScroll(){const e=document.querySelector(".modal"),y=e?e.scrollTop:0;render();const n=document.querySelector(".modal");if(n)n.scrollTop=y}
+const blank=p=>{const c=cur(p);return{id:uid(),status:"Não iniciado",date:today(),method:"Grátis",tIV:c.iv,tQ:c.q,fName:p.name,fIV:"",fQ:"",rIV:"",rQ:"",feroBought:false,feroQty:0,feroPrice:0,foodBought:false,foodPrice:0,dbl:true,stones:(pst(p).length?pst(p):[""]).map(t=>({type:t,bought:false,qty:0,price:0})),fixed:2000000}};
+function syncStones(p,b){const ps=pst(p);if(!ps.length)return b;const rows=b.stones.map(x=>({...x}));rows.forEach(x=>{if(!ps.includes(x.type)){const f=ps.find(t=>!rows.some(r=>r.type===t));if(f)x.type=f}});ps.forEach(t=>{if(!rows.some(r=>r.type===t))rows.push({type:t,bought:false,qty:0,price:0})});return{...b,stones:rows}}
+
+/* ===== Eventos ===== */
+document.addEventListener("click",async e=>{
+  const t=e.target.closest("[data-act]");if(!t)return;const a=t.dataset.act,id=t.dataset.id;
+  if(a==="login")return login(document.getElementById("nick").value,document.getElementById("pin").value,document.getElementById("rem").checked);
+  if(a==="theme"){const t=isDark()?"light":"dark";document.documentElement.setAttribute("data-theme",t);try{localStorage.setItem("piw_theme",t)}catch(x){}return render()}
+  if(a==="logout")return logout();
+  if(a==="home"){location.hash="#/";return render()}
+  if(a==="open"){location.hash="#/p/"+id;return render()}
+  if(a==="newp"){ui.modal={t:"p"};return render()}
+  if(a==="close"){ui.modal=null;return render()}
+  if(a==="newb"){ui.modal={t:"b",pid:id,edit:false,b:blank(P(id))};return render()}
+  if(a==="editb"){ui.modal={t:"b",pid:id,edit:true,b:syncStones(P(id),{...P(id).breeds.find(x=>x.id===t.dataset.b)})};return render()}
+  if(a==="resb"){ui.modal={t:"r",pid:id,edit:true,b:{...P(id).breeds.find(x=>x.id===t.dataset.b)}};return render()}
+  if(a==="chart"){ui.modal={t:"c",k:t.dataset.k,pid:t.dataset.id||null};return render()}
+  if(a==="editp"){ui.modal={t:"p",edit:true,pid:id};return render()}
+  if(a==="togan"){ui.hideAn=!ui.hideAn;Store.set("piw_hideAn",ui.hideAn);return render()}
+  if(a==="togdone"){ui.hideDone=!ui.hideDone;Store.set("piw_hide",ui.hideDone);return render()}
+  if(a==="delb"&&confirm("Excluir este breed?")){const p=P(ui.modal.pid);p.breeds=p.breeds.filter(x=>x.id!==ui.modal.b.id);save();ui.modal=null;return render()}
+  if(a==="delp"&&confirm("Excluir este Pokémon e todos os breeds?")){S.data.projects=S.data.projects.filter(x=>x.id!==id);save();location.hash="#/";return render()}
+  if(a==="demo"){demo();return}
+  if(a==="export"){ui.modal={t:"x"};return render()}
+  if(a==="import"){ui.imp=null;ui.modal={t:"i"};return render()}
+  if(a==="doexport"){const u=URL.createObjectURL(new Blob([JSON.stringify(S.data,null,1)],{type:"application/json"})),l=document.createElement("a");l.href=u;l.download="breeding-"+S.user+"-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);ui.modal=null;return render()}
+  if(a==="doimport"){if(!ui.imp||ui.imp.err)return;const j=ui.imp.data;j.projects.forEach(q=>{q.breeds=q.breeds||[]});S.data=mig(j);save();ui.modal=null;ui.imp=null;return render()}
+});
+document.addEventListener("change",async e=>{if(e.target.id!=="impf")return;const f=e.target.files[0];if(!f)return;
+  try{const j=JSON.parse(await f.text());if(!Array.isArray(j.projects)||!j.projects.every(q=>q&&typeof q==="object"&&q.name))throw 0;ui.imp={name:f.name,data:j,pk:j.projects.length,br:sum(j.projects.map(q=>(q.breeds||[]).length))}}
+  catch(x){ui.imp={name:f.name,err:"Este arquivo não parece um backup deste site. Use um arquivo gerado pelo botão Exportar."}}render()});
+document.addEventListener("change",e=>{const f=e.target.closest('form[data-form="b"]');if(f&&/^(method|feroBought|foodBought|st_bought_\d+)$/.test(e.target.name)){ui.modal.b=readForm(f,ui.modal.b);keepScroll()}});
+document.addEventListener("input",e=>{if(e.target.name==="stone"||e.target.name==="stone2"){const s=document.getElementById(e.target.name==="stone"?"stpv":"stpv2");if(s)s.innerHTML=stoneImg(e.target.value.trim())}});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&ui.modal){ui.modal=null;render()}});
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.target.id==="nick"||e.target.id==="pin"))login(document.getElementById("nick").value,document.getElementById("pin").value,document.getElementById("rem").checked)});
+document.addEventListener("submit",e=>{
+  const f=e.target.dataset.form;if(!f)return;e.preventDefault();
+  if(f==="p"){const v=Object.fromEntries(new FormData(e.target));if(!v.name.trim())return;const d={name:v.name.trim(),startIV:+v.startIV||0,startQ:+v.startQ||0,stone:(v.stone||"").trim(),stone2:(v.stone2&&v.stone2!==v.stone?v.stone2:"")};
+    if(ui.modal.edit)Object.assign(P(ui.modal.pid),d);else S.data.projects.push({id:uid(),...d,breeds:[]});save();ui.modal=null;return render()}
+  const m=ui.modal,p=P(m.pid),b=readForm(e.target,m.b);
+  if(f==="r")b.status="Finalizado";
+  if(b.method==="Grátis")b.feroBought=false;
+  if(f==="b")b.stones.forEach(x=>{if(!x.bought){x.qty=0;x.price=0}});
+  if(m.edit)p.breeds=p.breeds.map(x=>x.id===b.id?b:x);else p.breeds.push(b);
+  save();ui.modal=null;render();
+});
+window.addEventListener("hashchange",render);
+function demo(){
+  const mk=(d,tQ,fIV,fQ,rQ,fb,sq,sp,fp,ft)=>({id:uid(),status:"Finalizado",date:d,method:"Grátis",tIV:174,tQ,fName:"Eevee",fIV,fQ,rIV:174,rQ,feroBought:false,feroQty:0,feroPrice:0,foodBought:fb,foodPrice:fp||0,dbl:true,stoneType:"Heart Stone",stoneBought:sq>0,stoneQty:sq,stonePrice:sp,fixed:2000000});
+  S.data.projects.push({id:uid(),name:"Eevee",startIV:174,startQ:1.197,stone:"Heart Stone",breeds:[
+    mk("28-09 / 19:00",1.197,148,1.088,1.202,false,0,0),mk("",1.202,140,1.196,1.212,false,2,53900),mk("",1.212,101,1.089,1.222,true,5,63900,65000),mk("",1.222,109,1.103,1.227,true,22,46000,50000),
+    {...mk("",1.227,117,1.166,"",true,0,0,50000),status:"Chocando",rIV:""}]});
+  mig(S.data);save();render();
+}
+(async()=>{
+  const q=getSess();
+  if(q&&q.n){
+    if(!CLOUD){S.user=q.n;S.data=loadData(q.n);save()}
+    else if(q.t){
+      try{const r=await rpc("piw_load",{p_nick:q.n,p_token:q.t});
+        if(r.status==="ok"){S.user=q.n;S.token=q.t;S.rev=r.updated_at;S.data=mig(r.data||{projects:[]});Store.set("piw_data_"+q.n,S.data);S.sync="ok"}
+        else clearSess()}
+      catch(e){const loc=Store.get("piw_data_"+q.n);if(loc){S.user=q.n;S.token=q.t;S.data=mig(loc);S.sync="err"}}
+    }else clearSess();
+  }
+  render();loadNames();
+})();
+</script>
+</body>
+</html>
