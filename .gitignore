@@ -1,0 +1,15 @@
+breeding-*.json
+*.bak
+
+.env
+.env.*
+
+.vercel/
+node_modules/
+
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.log
