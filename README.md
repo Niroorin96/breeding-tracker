@@ -2,7 +2,7 @@
 
 Site gratuito para anotar cada breed do Poke Idle World e ver, em números, o que está compensando: quanto você gastou, quanto a qualidade subiu e qual método rende mais.
 
-🔗 **Acesse:** https://SEU-PROJETO.vercel.app
+🔗 **Acesse:** https://piw-breeding.vercel.app/
 
 🔒 **O site não se conecta ao jogo**
 Ele não lê nem altera nada da sua conta no jogo. Só guarda o que você digita. Não pede e-mail, e o nick não precisa ser o mesmo do jogo. O código está todo aqui pra você conferir.
@@ -45,13 +45,6 @@ O site inteiro é um único `index.html` (HTML, CSS e JavaScript puro, sem frame
 | `config.js` | URL e chave pública do Supabase, links do rodapé, imagens de fundo |
 | `supabase_setup.sql` | Cria a tabela e as funções do banco |
 | `ICO.png`, `BG_DARK.jpg`, `BG_LIGHT.jpg` | Ícone e imagens de fundo |
-
-**Publicar sua própria cópia**
-1. Crie um projeto no [Supabase](https://supabase.com) e rode o `supabase_setup.sql` no SQL Editor.
-2. Preencha `SB_URL` e `SB_KEY` no `config.js` (só a chave pública, nunca a `service_role`).
-3. Importe o repositório no [Vercel](https://vercel.com) com Framework Preset: Other.
-
-Sem `config.js`, o site funciona só no navegador, salvando no próprio aparelho.
 
 ## Créditos
 Desenvolvido por **Niroo**. Imagens e nomes dos Pokémon: [PokeAPI](https://pokeapi.co). Ícones das stones: site do Poke Idle World. Imagens de fundo: Pinterest/Reddit.
