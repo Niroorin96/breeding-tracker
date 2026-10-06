@@ -6,7 +6,10 @@
 
 <p align="center"><b>Seus breedings do Poke Idle World em números e gráficos.</b></p>
 
-<img width="500" height="450" alt="image" src="https://github.com/user-attachments/assets/7b9ca6fd-43af-4427-b8a8-fb919d1533d2" /><img width="500" height="450" alt="image" src="https://github.com/user-attachments/assets/4540fef4-856a-4b86-b066-78ff3cca4be4" />
+<p align="center">
+  <img width="49%" alt="Página do Pokémon" src="https://github.com/user-attachments/assets/7b9ca6fd-43af-4427-b8a8-fb919d1533d2" />
+  <img width="49%" alt="Preços pagos e breeds" src="https://github.com/user-attachments/assets/4540fef4-856a-4b86-b066-78ff3cca4be4" />
+</p>
 
 Site gratuito para anotar cada breed do Poke Idle World e ver, em números, o que está compensando: quanto você gastou, quanto a qualidade subiu e qual método rende mais.
 
