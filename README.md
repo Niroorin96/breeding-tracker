@@ -1,4 +1,12 @@
-# Breeding Tracker · Poke Idle World
+<p align="center">
+  <img src="ICO.png" alt="Breeding Tracker" width="96">
+</p>
+
+<h1 align="center">Breeding Tracker</h1>
+
+<p align="center"><b>Seus breedings do Poke Idle World em números e gráficos.</b></p>
+
+<img width="500" height="450" alt="image" src="https://github.com/user-attachments/assets/7b9ca6fd-43af-4427-b8a8-fb919d1533d2" /><img width="500" height="450" alt="image" src="https://github.com/user-attachments/assets/4540fef4-856a-4b86-b066-78ff3cca4be4" />
 
 Site gratuito para anotar cada breed do Poke Idle World e ver, em números, o que está compensando: quanto você gastou, quanto a qualidade subiu e qual método rende mais.
 
@@ -47,7 +55,7 @@ O site inteiro é um único `index.html` (HTML, CSS e JavaScript puro, sem frame
 | `ICO.png`, `BG_DARK.jpg`, `BG_LIGHT.jpg` | Ícone e imagens de fundo |
 
 ## Créditos
-Desenvolvido por **Niroo**. Imagens e nomes dos Pokémon: [PokeAPI](https://pokeapi.co). Ícones das stones: site do Poke Idle World. Imagens de fundo: Pinterest/Reddit.
+Imagens e nomes dos Pokémon: [PokeAPI](https://pokeapi.co). Ícones das stones: site do Poke Idle World. Imagens de fundo: Pinterest/Reddit.
 
 Projeto de fã e independente, sem ligação com o Poke Idle World, a Nintendo, a Game Freak ou a The Pokémon Company.
 
