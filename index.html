@@ -190,6 +190,19 @@ button:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
 .cg3 .qn{display:none}
 @media(max-width:560px){.cg3 .qw{display:none}.cg3 .qn{display:block}}
 button[data-act="delbc"]:hover{border-color:var(--ac)}
+/* status do Pokémon no card */
+..pst{display:flex;flex-direction:column;align-items:flex-end}
+.pk{position:relative}
+.pk .stt{position:absolute;top:12px;right:12px}
+.stt{font-size:11px;color:var(--mu);cursor:help;white-space:nowrap}
+.stt i{display:inline-block;width:7px;height:7px;margin-right:5px;background:var(--mu)}
+.stt.Chocando{color:var(--warn)}
+.stt.Chocando i{background:var(--warn)}
+/* página individual: rodapé do card à direita */
+.hero .foot{justify-content:flex-end}
+/* avisos do breed */
+input.bad{border-color:var(--ac)!important;background:color-mix(in srgb,var(--ac) 14%,var(--bg))}
+.fqwarn{margin:4px 0 6px}
 </style>
 </head>
 <body>
@@ -306,7 +319,7 @@ const pstat=(r,w)=>{if(!r.length)return{n:0};const ps=r.map(x=>x.price),wq=w&&r.
 const CH_FREE=[[.5,.005],[.35,.010],[.12,.020],[.03,.040]],CH_FERO=[[.5,.15],[.3,.20],[.15,.25],[.05,.30]];
 
 const LINK_AJUDE=CFG.LINK_AJUDE||"https://exemplo.com/ajude-o-projeto",LINK_CONTATO=CFG.LINK_CONTATO||"https://exemplo.com/contato";
-const VERSION="v2.0.1";
+const VERSION="v2.1.1";
 const foot=()=>`<footer class="ft">Desenvolvido por Niroo · <a href="${LINK_AJUDE}" target="_blank" rel="noopener">Ajude o projeto</a> · <a href="${LINK_CONTATO}" target="_blank" rel="noopener">Contato</a></footer>`;
 let S={user:null,data:{projects:[]}},ui={modal:null,err:"",hideDone:!!Store.get("piw_hide"),hideAn:!!Store.get("piw_hideAn")};
 const isDark=()=>{const t=document.documentElement.getAttribute("data-theme");return t?t==="dark":true};
@@ -372,7 +385,7 @@ function render(){
   const m=location.hash.match(/^#\/p\/(\w+)/),p=m&&P(m[1]);
   a.innerHTML=`<header><div class="hl"><b data-act="home"><img class="pball" src="ICO.png" alt=""> Breeding Tracker</b><span class="ver">${VERSION}</span></div><div class="hc"><span>${esc(S.user)}</span><span class="mu" id="syncst">${CLOUD?esc(SYNC[S.sync]||""):""}</span></div>
   <div class="hr"><button class="sm themebtn" data-act="theme" title="Alternar modo claro/escuro">${isDark()?"☀️":"🌙"}</button><button class="sm" data-act="export">Exportar</button><button class="sm" data-act="import">Importar</button><button class="sm" data-act="logout">Sair</button></div></header>
-  <main>${p?detail(p):home()}</main>${foot()}${ui.modal?modal():""}`;
+  <main>${p?detail(p):home()}</main>${foot()}${ui.modal?modal():""}${ui.warn?warnHtml():""}`;
   hydrate();
 }
 /* ===== Gráficos SVG (sem bibliotecas) ===== */
@@ -461,8 +474,9 @@ function home(){
   <div class="ib"><b>💎 Double Stone</b><div class="chips"><span>5% de +1 no IV</span><span>custo fixo padrão: $2.000.000</span></div></div></div>`;
 }
 function pc(p){
-  const c=cur(p),d=fin(p).length,g=c.q-p.startQ;
-  return`<div class="card pk" data-act="open" data-id="${p.id}"><div class="row">${spr(p.name)}<div><b>${esc(p.name)}</b><div class="mu">IV ${p.startIV===c.iv?c.iv:p.startIV+" → "+c.iv}</div><div class="mu">${d} breeds</div></div><span class="sp"></span>${rt(c.q)}</div>
+  const c=cur(p),d=fin(p).length,g=c.q-p.startQ,ch=p.breeds.some(b=>b.status==="Chocando"),
+    tip=(ch?"Chocando":"Parado")+" · conta: "+(p.acc||"não informada");
+  return`<div class="card pk" data-act="open" data-id="${p.id}"><div class="row">${spr(p.name)}<div><b>${esc(p.name)}</b><div class="mu">IV ${p.startIV===c.iv?c.iv:p.startIV+" → "+c.iv}</div><div class="mu">${d} breeds</div></div><span class="sp"></span><div class="pst"><span class="stt ${ch?"Chocando":""}" title="${esc(tip)}"><i></i>${ch?"Chocando":"Parado"}</span>${rt(c.q)}</div></div>
   <div class="row" style="margin-top:12px;flex-wrap:wrap"><div class="ini"><small>Inicial</small>${q3(p.startQ)}</div><span class="arr">→</span><div class="ini"><small>Atual</small><b>${q3(c.q)}</b></div><span class="${g>0?"up":"eq"}">${sg(g)}</span></div>
   <div class="row" style="margin-top:10px;padding-top:8px;border-top:1px solid var(--line)"><span class="lbl">Gasto total</span><span class="sp"></span><span class="usd">${usd(totalCost(p))}</span></div></div>`;
 }
@@ -478,7 +492,7 @@ function detail(p){
   <div class="card hero" style="margin-top:10px"><div class="row" style="flex-wrap:wrap">${spr(p.name,"lg")}<div><div class="big">${esc(p.name)}</div><div class="mu">${p.breeds.length} breeds registrados</div></div><span class="sp"></span>
   <div class="row" style="gap:28px;align-items:flex-start"><div style="text-align:right"><div class="lbl">IV atual</div><div class="big">${c.iv}</div></div><div style="text-align:right"><div class="lbl">Qualidade atual</div><div class="big">${q3(c.q)}</div>${rt(c.q)}</div></div></div>
   <div class="bar"></div>
-  <div class="row foot"><div>Qualidade inicial <b>${q3(p.startQ)}</b> → IV inicial <b>${p.startIV}</b></div></div></div>
+  <div class="row foot"><div>IV inicial <b>${p.startIV}</b> → Qualidade Inicial <b>${p.startQ}</b></div></div></div>
   <div class="stats ledger"><div class="stat"><div class="lbl">Diferença</div><div class="big ${g>0?"up":""}">${sg(g)}</div><div class="mu">IV ${ivg>=0?"+":""}${ivg}</div></div>
   <div class="stat"><div class="lbl">Custo total</div><div class="big usd">${usd(tc)}</div></div>
   <div class="stat"><div class="lbl">Breeds finalizados</div><div class="big">${f.length}</div><div class="mu">${p.breeds.length} no total</div></div>
@@ -560,13 +574,13 @@ Meu nick: ${esc(nk)}</pre>
     <div class="row" style="margin-top:16px"><span class="sp"></span><button data-act="close">Cancelar</button><button class="pri" data-act="doimport" ${I&&!I.err?"":"disabled"}>Substituir meus dados</button></div>`)}
   if(m.t==="p"){const e=m.edit?P(m.pid):{name:"",startIV:"",startQ:"",stone:"",stone2:""},ss=(n,v,ph)=>`<select name="${n}"><option value="">${ph}</option>${((!v||STONES.includes(v))?STONES:[...STONES,v]).map(o=>`<option ${o===v?"selected":""}>${esc(o)}</option>`).join("")}</select>`;
     return`<div class="modal"><div class="card"><b class="big">${m.edit?"Editar Pokémon":"Novo Pokémon"}</b><div class="mu">Cadastre o Pokémon que você quer melhorar. Depois é só registrar cada breed.</div>
-  <form data-form="p">${dl}${inp("Nome do Pokémon","name",e.name,"text",'list="dl-pk" autocomplete="off" placeholder="Digite para buscar…"')}
+  <form data-form="p">${dl}<div class="f2">${inp("Nome do Pokémon","name",e.name,"text",'list="dl-pk" autocomplete="off" placeholder="Digite para buscar…"')}${inp("Em qual conta está?","acc",e.acc||"","text",'list="dl-acc" autocomplete="off" placeholder="ex.: conta principal"')}</div><datalist id="dl-acc">${[...new Set(S.data.projects.map(x=>x.acc).filter(Boolean))].map(a=>`<option value="${esc(a)}">`).join("")}</datalist>
   <div class="f2">${inp("IV inicial","startIV",e.startIV,"number")}${inp("Qualidade inicial","startQ",e.startQ,"number")}</div>
   <label>Stone usada neste Pokémon</label><div class="row"><span id="stpv">${stoneImg(e.stone)}</span>${ss("stone",e.stone,"Selecione a stone…")}</div>
   <label>Segunda stone <span style="text-transform:none">(só se este Pokémon usa 2 tipos)</span></label><div class="row"><span id="stpv2">${stoneImg(e.stone2)}</span>${ss("stone2",e.stone2,"Nenhuma")}</div>
   <div class="mu" style="margin-top:4px">As stones escolhidas já vêm selecionadas em cada novo breed; lá você só marca se comprou e o valor.</div>
   <div class="row" style="margin-top:14px"><span class="sp"></span><button type="button" data-act="close">Cancelar</button><button class="pri">${m.edit?"Salvar":"Criar"}</button></div></form></div></div>`}
-  const b=m.b,p=P(m.pid),S_=["Não iniciado","Chocando","Finalizado"],B=v=>v?"Sim":"Não";
+  const b=m.b,p=P(m.pid),S_=["Não iniciado","Chocando","Finalizado"],B=v=>v?"Sim":"Não",fbad=+b.fQ>0&&+b.tQ>0&&+b.fQ>+b.tQ;
   if(m.t==="r")return`<div class="modal"><div class="card"><b class="big">Resultado · ${esc(b.fName)}</b><div class="mu">Inicial: IV ${b.tIV} · ${q3(b.tQ)}</div>
   <form data-form="r"><div class="f2">${inp("IV resultante","rIV",b.rIV,"number")}${inp("Qualidade resultante","rQ",b.rQ,"number")}</div><div class="mu" style="margin-top:8px">Ao salvar, o status muda para Finalizado.</div>
   <div class="row" style="margin-top:14px"><span class="sp"></span><button type="button" data-act="close">Cancelar</button><button class="pri">Salvar resultado</button></div></form></div></div>`;
@@ -579,7 +593,7 @@ Meu nick: ${esc(nk)}</pre>
   <form data-form="b">${dl}
   ${sec(++n,"Informações do breed","",`<div class="f2">${sel("Status","status",b.status,S_)}${sel("Método","method",b.method,["Grátis","Feromônio"])}</div>${inp("Data / horário","date",b.date)}`)}
   ${sec(++n,"Pokémon inicial","O Pokémon que você já tem (valores atuais).",`<div class="f2">${inp("IV","tIV",b.tIV,"number")}${inp("Qualidade","tQ",b.tQ,"number")}</div>`)}
-  ${sec(++n,"Food","O Pokémon que será usado como food neste breed.",`<div class="f3">${inp("Nome","fName",b.fName,"text",'list="dl-pk" autocomplete="off"')}${inp("IV","fIV",b.fIV,"number")}${inp("Qualidade","fQ",b.fQ,"number")}</div>`)}
+  ${sec(++n,"Food","O Pokémon que será usado como food neste breed.",`<div class="err fqwarn" id="fqwarn" style="display:${fbad?"block":"none"}">⚠ Qualidade MAIOR que o Pokémon alvo</div><div class="f3">${inp("Nome","fName",b.fName,"text",'list="dl-pk" autocomplete="off"')}${inp("IV","fIV",b.fIV,"number")}${inp("Qualidade","fQ",b.fQ,"number",fbad?'class="bad"':"")}</div>`)}
   ${fero?sec(++n,"Feromônio","",`<div class="f3">${sel("Comprou fero?","feroBought",B(b.feroBought),["Não","Sim"])}${b.feroBought?inp("Quantidade","feroQty",b.feroQty,"number")+money("Valor (un)","feroPrice",b.feroPrice):""}</div>`):""}
   ${sec(++n,"Gastos adicionais","Tudo em dólar ($). Só preencha o que você comprou.",`
     <div class="sub"><b>Food</b><div class="f2">${sel("Comprou a food?","foodBought",B(b.foodBought),["Não","Sim"])}${b.foodBought?money("Valor da food","foodPrice",b.foodPrice):""}</div></div>
@@ -607,6 +621,10 @@ document.addEventListener("click",async e=>{
   if(a==="theme"){const t=isDark()?"light":"dark";document.documentElement.setAttribute("data-theme",t);try{localStorage.setItem("piw_theme",t)}catch(x){}return render()}
   if(a==="forgot"){const n=document.getElementById("nick");ui.nick=n?n.value:"";ui.modal={t:"f"};return render()}
   if(a==="copymsg"){const n=(ui.nick||"").trim()||"seu-nick";if(navigator.clipboard)navigator.clipboard.writeText("Oi, Niroo! Esqueci meu PIN no Breeding Tracker. Meu nick: "+n);t.textContent="Copiado ✓";return}
+    if(a==="wback"){ui.warn=null;return keepScroll()}
+  if(a==="wq"){ui.modal.ok.q=true;return trySaveBreed()}
+  if(a==="wkeep"){ui.modal.ok.s=true;return trySaveBreed()}
+  if(a==="wchoc"){ui.modal.b.status="Chocando";ui.modal.ok.s=true;return trySaveBreed()}
   if(a==="logout")return logout();
   if(a==="home"){location.hash="#/";return render()}
   if(a==="open"){location.hash="#/p/"+id;return render()}
@@ -633,16 +651,35 @@ document.addEventListener("change",async e=>{if(e.target.id!=="impf")return;cons
   catch(x){ui.imp={name:f.name,err:"Este arquivo não parece um backup deste site. Use um arquivo gerado pelo botão Exportar."}}render()});
 document.addEventListener("change",e=>{const f=e.target.closest('form[data-form="b"]');if(f&&/^(method|feroBought|foodBought|st_bought_\d+)$/.test(e.target.name)){ui.modal.b=readForm(f,ui.modal.b);keepScroll()}});
 document.addEventListener("input",e=>{if(e.target.name==="stone"||e.target.name==="stone2"){const s=document.getElementById(e.target.name==="stone"?"stpv":"stpv2");if(s)s.innerHTML=stoneImg(e.target.value.trim())}});
-document.addEventListener("keydown",e=>{if(e.key==="Escape"&&ui.modal){ui.modal=null;render()}});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(ui.warn){ui.warn=null;keepScroll()}else if(ui.modal){ui.modal=null;render()}}});
 document.addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.target.id==="nick"||e.target.id==="pin"))login(document.getElementById("nick").value,document.getElementById("pin").value,document.getElementById("rem").checked)});
+function foodWarn(f){const tq=+f.elements.tQ.value,fq=+f.elements.fQ.value,bad=fq>0&&tq>0&&fq>tq,w=document.getElementById("fqwarn");f.elements.fQ.classList.toggle("bad",bad);if(w)w.style.display=bad?"block":"none"}
+document.addEventListener("input",e=>{const f=e.target.closest('form[data-form="b"]');if(f&&(e.target.name==="tQ"||e.target.name==="fQ"))foodWarn(f)});
+function breedWarns(b,ok){
+  const tq=+b.tQ,fq=+b.fQ,filled=tq>0&&fq>0&&+b.tIV>0&&+b.fIV>0;
+  if(fq>0&&tq>0&&fq>tq&&!ok.q)return{title:"Qualidade da food maior que a do alvo",msg:"A food tem qualidade "+q3(fq)+", MAIOR que a do Pokémon alvo ("+q3(tq)+"). Isso costuma ser erro de digitação.",btns:[["Voltar e corrigir","wback",""],["Salvar mesmo assim","wq","pri"]]};
+  if(b.status==="Não iniciado"&&filled&&!ok.s)return{title:"Mudar o status para Chocando?",msg:'Este breed está como "Não iniciado". Quer salvar como "Chocando"?',btns:[["Manter Não iniciado","wkeep",""],["Salvar como Chocando","wchoc","pri"]]};
+  return null;
+}
+function trySaveBreed(){
+  const m=ui.modal;ui.warn=null;const w=breedWarns(m.b,m.ok);
+  if(w){ui.warn=w;return keepScroll()}
+  const p=P(m.pid),b=m.b;
+  if(b.method==="Grátis")b.feroBought=false;
+  b.stones.forEach(x=>{if(!x.bought){x.qty=0;x.price=0}});
+  if(m.edit)p.breeds=p.breeds.map(x=>x.id===b.id?b:x);else p.breeds.push(b);
+  save();ui.modal=null;render();
+}
+const warnHtml=()=>{const w=ui.warn;return`<div class="modal"><div class="card"><b class="big">⚠ ${w.title}</b><p>${w.msg}</p><div class="row" style="margin-top:14px;flex-wrap:wrap"><span class="sp"></span>${w.btns.map(x=>`<button type="button" class="${x[2]}" data-act="${x[1]}">${x[0]}</button>`).join("")}</div></div></div>`};
 document.addEventListener("submit",e=>{
   const f=e.target.dataset.form;if(!f)return;e.preventDefault();
-  if(f==="p"){const v=Object.fromEntries(new FormData(e.target));if(!v.name.trim())return;const d={name:v.name.trim(),startIV:+v.startIV||0,startQ:+v.startQ||0,stone:(v.stone||"").trim(),stone2:(v.stone2&&v.stone2!==v.stone?v.stone2:"")};
+  if(f==="p"){const v=Object.fromEntries(new FormData(e.target));if(!v.name.trim())return;const d={name:v.name.trim(),startIV:+v.startIV||0,startQ:+v.startQ||0,stone:(v.stone||"").trim(),stone2:(v.stone2&&v.stone2!==v.stone?v.stone2:""),acc:(v.acc||"").trim()};
     if(ui.modal.edit)Object.assign(P(ui.modal.pid),d);else S.data.projects.push({id:uid(),...d,breeds:[]});save();ui.modal=null;return render()}
-  const m=ui.modal,p=P(m.pid),b=readForm(e.target,m.b);
-  if(f==="r")b.status="Finalizado";
+  const m=ui.modal,b=readForm(e.target,m.b);
+  if(f==="b"){m.b=b;m.ok=m.ok||{};return trySaveBreed()}
+  const p=P(m.pid);
+  b.status="Finalizado";
   if(b.method==="Grátis")b.feroBought=false;
-  if(f==="b")b.stones.forEach(x=>{if(!x.bought){x.qty=0;x.price=0}});
   if(m.edit)p.breeds=p.breeds.map(x=>x.id===b.id?b:x);else p.breeds.push(b);
   save();ui.modal=null;render();
 });
