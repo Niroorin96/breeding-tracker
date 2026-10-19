@@ -37,6 +37,10 @@ Uma planilha de breeding pronta. Você cadastra o Pokémon, registra cada breed 
 - Linha do tempo com os breeds em andamento sempre no topo.
 - Tabela de chances de cada método sempre à mão.
 - Salva sozinho na nuvem e funciona em mais de um aparelho. Sem internet, guarda no aparelho e envia quando a conexão volta.
+- Foods fabricadas: quando a food precisa ser melhor do que dá para comprar, você sobe uma food com breeds próprios e o custo dela entra no breed do Pokémon alvo onde for usada.
+- Simulador "quanto falta": breeds, custo e tempo até a qualidade que você quer, já contando as foods fabricadas.
+- Aviso da regra de 0.15 de diferença entre os pais e da herança de IV.
+- Guia completo do Breeding, escrito por Tonashiro.
 - Exportar e importar backup (.json).
 - Modo claro e escuro, no PC, tablet e celular.
 
@@ -53,12 +57,13 @@ O site inteiro é um único `index.html` (HTML, CSS e JavaScript puro, sem frame
 | Arquivo | Função |
 |---|---|
 | `index.html` | O site inteiro |
-| `config.js` | URL e chave pública do Supabase, links do rodapé, imagens de fundo |
+| `config.js` | URL e chave pública do Supabase, link de contato, imagens de fundo, Supabase do Market (opcional) |
+| `game_species.json` | Nomes das 647 espécies do jogo e o recorte do sprite de cada uma |
 | `supabase_setup.sql` | Cria a tabela e as funções do banco |
 | `ICO.png`, `BG_DARK.jpg`, `BG_LIGHT.jpg` | Ícone e imagens de fundo |
 
 ## Créditos
-Imagens e nomes dos Pokémon: [PokeAPI](https://pokeapi.co). Ícones das stones: site do Poke Idle World. Imagens de fundo: Pinterest/Reddit.
+Nomes e sprites dos Pokémon: Poke Idle World (PokeAPI como reserva). Guia do Breeding: Tonashiro. Ícones das stones: site do Poke Idle World. Imagens de fundo: Pinterest/Reddit.
 
 Projeto de fã e independente, sem ligação com o Poke Idle World, a Nintendo, a Game Freak ou a The Pokémon Company.
 
