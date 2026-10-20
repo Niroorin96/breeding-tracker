@@ -235,7 +235,9 @@ button.linkbtn:active{transform:none}
   .rz:hover,.rz.on{background:color-mix(in srgb,var(--gold) 45%,transparent)}
 }
 /* market */
-.mkt{display:inline-block;font-size:11.5px;color:var(--mu);margin-top:3px}.mkt b{color:var(--gold);font-weight:500}
+.mkt{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--mu);margin-top:3px}.mkt b{color:var(--gold);font-weight:500}
+button.mkcp{padding:0 7px;font-size:13px;line-height:20px;box-shadow:0 2px 0 #0007}
+input.got{border-color:var(--ok)!important;background:color-mix(in srgb,var(--ok) 14%,var(--bg))}
 /* foods fabricadas */
 .fabs{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,380px),1fr));gap:12px;margin-top:12px}
 .fab{--cc:#2fd6c4;display:flex;flex-direction:column}
@@ -492,28 +494,34 @@ const noData='<div class="mu" style="padding:14px 0">Sem dados ainda</div>';
 const lg=a=>`<div class="chips lg" style="margin-top:8px">${a.map(x=>`<span><i style="background:${x.c}"></i>${esc(x.l)}</span>`).join("")}</div>`;
 function donut(it,sz){const t=sum(it.map(x=>x.v));if(!t)return noData;const r=38,C=2*Math.PI*r;let off=0;
   return`<svg viewBox="0 0 100 100" width="${sz||64}" height="${sz||64}" style="display:block;margin:0 auto"><g transform="rotate(-90 50 50)" fill="none" stroke-width="18">${it.filter(x=>x.v>0).map(x=>{const d=x.v/t*C,o=`<circle cx="50" cy="50" r="${r}" stroke="${x.c}" stroke-dasharray="${d} ${C-d}" stroke-dashoffset="${-off}"><title>${esc(x.l)}: ${esc(x.f??x.v)} (${Math.round(x.v/t*100)}%)</title></circle>`;off+=d;return o}).join("")}</g></svg>`}
-function bars(it,big){if(!it.length)return noData;const W=big?600:200,H=big?230:54,top=big?18:2,bot=big?22:0,n=it.length,gap=big?8:3,bw=Math.min(big?70:24,Math.max(2,(W-gap*(n-1))/n)),ph=H-top-bot,m=Math.max(...it.map(x=>x.v),1e-9);let x=(W-(bw*n+gap*(n-1)))/2,o="";
-  it.forEach(a=>{const h=a.v>0?Math.max(2,a.v/m*ph):0,y=top+ph-h;o+=`<rect x="${x}" y="${y}" width="${bw}" height="${h}" rx="2" fill="${a.c||"var(--ac2)"}"><title>${esc(a.t||a.l+": "+a.v)}</title></rect>`;
-    if(big)o+=`<text x="${x+bw/2}" y="${y-4}" text-anchor="middle" font-size="10" fill="var(--mu)">${esc(a.f??short(a.v))}</text><text x="${x+bw/2}" y="${H-6}" text-anchor="middle" font-size="10" fill="var(--mu)">${esc(String(a.l).slice(0,9))}</text>`;x+=bw+gap});
+/* muitos itens no gráfico grande: mostra só alguns rótulos (o resto aparece passando o mouse) */
+const DENSE=16,stepOf=n=>n>DENSE?Math.ceil(n/10):1,lbl=(i,n,st)=>st===1||i%st===0||i===n-1;
+function bars(it,big){if(!it.length)return noData;const n=it.length,dn=big&&n>DENSE,W=big?600:200,H=big?230:54,top=big?18:2,bot=big?22:0,gap=big?(dn?2:8):3,bw=Math.min(big?70:24,Math.max(2,(W-gap*(n-1))/n)),ph=H-top-bot,m=Math.max(...it.map(x=>x.v),1e-9),st=big?stepOf(n):1;let x=(W-(bw*n+gap*(n-1)))/2,o="";
+  it.forEach((a,i)=>{const h=a.v>0?Math.max(2,a.v/m*ph):0,y=top+ph-h;o+=`<rect x="${x}" y="${y}" width="${bw}" height="${h}" rx="${dn?1:2}" fill="${a.c||"var(--ac2)"}"><title>${esc(a.t||a.l+": "+a.v)}</title></rect>`;
+    if(big&&lbl(i,n,st))o+=`<text x="${x+bw/2}" y="${y-4}" text-anchor="middle" font-size="10" fill="var(--mu)">${esc(a.f??short(a.v))}</text><text x="${x+bw/2}" y="${H-6}" text-anchor="middle" font-size="10" fill="var(--mu)">${esc(String(a.l).slice(0,9))}</text>`;x+=bw+gap});
+  if(dn){const av=avg(it.map(a=>a.v)),y=top+ph-av/m*ph;o+=`<line x1="0" x2="${W}" y1="${y}" y2="${y}" stroke="var(--gold)" stroke-width="1.2" stroke-dasharray="5 4"/><text x="${W-2}" y="${y-4}" text-anchor="end" font-size="10" fill="var(--gold)">média ${esc(short(av))}</text>`}
   return`<svg viewBox="0 0 ${W} ${H}" width="100%" ${big?"":`height="${H}" preserveAspectRatio="none"`} style="display:block">${o}</svg>`}
 function line(it,big,fm,w){if(!it.length)return noData;const W=w||(big?600:200),H=w?118:(big?230:54),pad=big?26:4,bot=big?14:0,n=it.length,vs=it.map(x=>x.v),lo=Math.min(...vs),hi=Math.max(...vs),rg=(hi-lo)||1;
   const X=i=>pad+(n>1?i*(W-2*pad)/(n-1):(W-2*pad)/2),Y=v=>pad+(1-(v-lo)/rg)*(H-2*pad-bot);
   let o=`<polyline fill="none" stroke="var(--ac2)" stroke-width="${big?2.5:2}" ${big?"":'vector-effect="non-scaling-stroke"'} points="${it.map((a,i)=>X(i)+","+Y(a.v)).join(" ")}"/>`;
-  if(big)it.forEach((a,i)=>{o+=`<circle cx="${X(i)}" cy="${Y(a.v)}" r="4" fill="var(--ac2)"><title>${esc(a.t||a.l)}</title></circle><text x="${X(i)}" y="${Y(a.v)-8}" text-anchor="middle" font-size="10" fill="var(--mu)">${esc(fm?fm(a.v):short(a.v))}</text><text x="${X(i)}" y="${H-3}" text-anchor="middle" font-size="10" fill="var(--mu)">${esc(a.l)}</text>`});
+  if(big){const st=stepOf(n),dn=n>DENSE;it.forEach((a,i)=>{const sh=lbl(i,n,st);o+=`<circle cx="${X(i)}" cy="${Y(a.v)}" r="${dn?(sh?3.5:2):4}" fill="var(--ac2)"><title>${esc(a.t||a.l)}</title></circle>`;
+    if(sh)o+=`<text x="${X(i)}" y="${Y(a.v)-8}" text-anchor="middle" font-size="10" fill="var(--mu)">${esc(fm?fm(a.v):short(a.v))}</text><text x="${X(i)}" y="${H-3}" text-anchor="middle" font-size="10" fill="var(--mu)">${esc(a.l)}</text>`})}
   return`<svg viewBox="0 0 ${W} ${H}" width="100%" ${big?"":`height="${H}" preserveAspectRatio="none"`} style="display:block">${o}</svg>`}
 function candles(it,big){if(!it.length)return noData;const W=big?600:200,H=big?250:54,pl=big?44:3,pad=big?18:3,bot=big?16:0,n=it.length,all=it.flatMap(x=>[x.o,x.c]),lo=Math.min(...all),hi=Math.max(...all),rg=(hi-lo)||.01,slot=(W-pl-pad)/n,bw=Math.min(big?34:12,slot*.6);
   const Y=v=>pad+(1-(v-lo)/rg)*(H-2*pad-bot);let o=big?`<text x="2" y="${Y(hi)+4}" font-size="10" fill="var(--mu)">${q3(hi)}</text><text x="2" y="${Y(lo)+4}" font-size="10" fill="var(--mu)">${q3(lo)}</text>`:"";
   it.forEach((a,i)=>{const cx=pl+i*slot+slot/2,up=a.c>a.o,c=up?"var(--ok)":a.c<a.o?"var(--ac)":"var(--mu)",y1=Y(Math.max(a.o,a.c)),h=Math.max(2,Math.abs(Y(a.o)-Y(a.c)));
     o+=`<rect x="${cx-bw/2}" y="${y1}" width="${bw}" height="${h}" rx="2" fill="${c}"><title>Breed ${esc(a.l)}: ${q3(a.o)} → ${q3(a.c)}</title></rect>`;if(big)o+=`<text x="${cx}" y="${H-3}" text-anchor="middle" font-size="10" fill="var(--mu)">${esc(a.l)}</text>`});
   return`<svg viewBox="0 0 ${W} ${H}" width="100%" ${big?"":`height="${H}" preserveAspectRatio="none"`} style="display:block">${o}</svg>`}
-function stack(cols,keys){if(!cols.length||!cols.some(c=>sum(c.p)>0))return noData;const W=600,H=240,top=18,bot=22,n=cols.length,gap=8,bw=Math.max(4,(W-gap*(n-1))/n),ph=H-top-bot,m=Math.max(...cols.map(c=>sum(c.p)),1);let x=0,o="";
-  cols.forEach(c=>{let y=top+ph;c.p.forEach((v,j)=>{const h=v/m*ph;y-=h;if(h>0)o+=`<rect x="${x}" y="${y}" width="${bw}" height="${h}" fill="${keys[j].c}"><title>${esc(c.l)} · ${esc(keys[j].l)}: ${usd(v)}</title></rect>`});
-    o+=`<text x="${x+bw/2}" y="${y-4}" text-anchor="middle" font-size="10" fill="var(--mu)">${short(sum(c.p))}</text><text x="${x+bw/2}" y="${H-6}" text-anchor="middle" font-size="10" fill="var(--mu)">${esc(String(c.l).slice(0,9))}</text>`;x+=bw+gap});
+function stack(cols,keys){if(!cols.length||!cols.some(c=>sum(c.p)>0))return noData;const W=600,H=240,top=18,bot=22,n=cols.length,dn=n>DENSE,gap=dn?2:8,bw=Math.max(2,(W-gap*(n-1))/n),ph=H-top-bot,m=Math.max(...cols.map(c=>sum(c.p)),1),st=stepOf(n);let x=0,o="";
+  cols.forEach((c,i)=>{let y=top+ph;c.p.forEach((v,j)=>{const h=v/m*ph;y-=h;if(h>0)o+=`<rect x="${x}" y="${y}" width="${bw}" height="${h}" fill="${keys[j].c}"><title>${esc(c.l)} · ${esc(keys[j].l)}: ${usd(v)}</title></rect>`});
+    if(lbl(i,n,st))o+=`<text x="${x+bw/2}" y="${y-4}" text-anchor="middle" font-size="10" fill="var(--mu)">${short(sum(c.p))}</text><text x="${x+bw/2}" y="${H-6}" text-anchor="middle" font-size="10" fill="var(--mu)">${esc(String(c.l).slice(0,9))}</text>`;x+=bw+gap});
+  if(dn){const av=avg(cols.map(c=>sum(c.p))),y=top+ph-av/m*ph;o+=`<line x1="0" x2="${W}" y1="${y}" y2="${y}" stroke="var(--gold)" stroke-width="1.2" stroke-dasharray="5 4"/><text x="${W-2}" y="${y-4}" text-anchor="end" font-size="10" fill="var(--gold)">média ${esc(short(av))}</text>`}
   return`<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block">${o}</svg>`}
 const hbar=a=>{const t=sum(a.map(x=>x.v));if(!t)return noData;return`<div style="display:flex;height:16px;border-radius:8px;overflow:hidden;margin-top:8px;background:var(--line)">${a.filter(x=>x.v>0).map(x=>`<span class="seg" title="${esc(x.l)}: ${usd(x.v)}" style="width:${x.v/t*100}%;background:${x.c}"></span>`).join("")}</div>${lg(a.map(x=>({l:x.l+" "+Math.round(x.v/t*100)+"%",c:x.c})))}`};
 const qpts=(p,fi)=>[{v:+p.startQ,l:"Início",t:"Início: "+q3(p.startQ)},...fi.filter(x=>+x.b.rQ).map(x=>({v:+x.b.rQ,l:"#"+x.n,t:"Breed "+x.n+": "+q3(x.b.rQ)}))];
 const histItems=h=>h.map(x=>({l:sg(x.g),v:x.c,f:x.c+"×",t:sg(x.g)+": "+x.c+"×",c:x.g>0?"var(--ok)":"var(--mu)"}));
 const histDonut=h=>h.map((x,i)=>({l:sg(x.g),v:x.c,c:COL[i%COL.length],f:x.c+"×"}));
+const tblL=(h,r)=>r.length<=10||ui.allRows?tbl(h,r)+(r.length>10?`<div style="text-align:center;margin-top:8px"><button class="sm" data-act="allrows">Mostrar só os 10 mais recentes</button></div>`:""):tbl(h,r.slice(0,10))+`<div style="text-align:center;margin-top:8px"><button class="sm" data-act="allrows">Ver todos (${r.length})</button></div>`;
 const tbl=(h,r)=>`<div class="wrap" style="margin-top:12px"><table><tr>${h.map((x,i)=>`<th>${x}${i<h.length-1?'<span class="rz" aria-hidden="true"></span>':""}</th>`).join("")}</tr>${r.map(x=>`<tr>${x.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</table></div>`;
 const kvs=a=>`<div class="stats">${a.map(([l,v])=>`<div class="stat"><div class="lbl">${l}</div><div class="big" style="font-size:18px">${v}</div></div>`).join("")}</div>`;
 const cm=(t,body,sub)=>`<div class="modal"><div class="card cw"><div class="row"><div><b class="big">${t}</b>${sub?`<div class="mu">${sub}</div>`:""}</div><span class="sp"></span><button class="sm" data-act="close">✕ Fechar</button></div><div style="margin-top:14px">${body}</div></div></div>`;
@@ -536,13 +544,13 @@ function chartModal(k,pid){
     return cm("Grátis vs Feromônio",donut(M.map((x,i)=>({l:x.m,v:x.n,c:COL[i*2],f:x.n+" breeds"})),200)+lg(M.map((x,i)=>({l:x.m+" · "+x.n,c:COL[i*2]})))+tbl(["Método","Breeds","Custo médio","Ganho médio","Custo por +0,001"],M.map(x=>[x.m,x.n,usd(x.c),sg(x.g),x.pm?usd(x.pm):"–"])),"Qual método está compensando mais.")}
   if(!p)return"";
   const fi=finI(p),f=fin(p);
-  if(k==="cost"){const cs=f.map(cost);return cm("Custo por breed · "+esc(p.name),bars(fi.map(x=>({l:"#"+x.n,v:cost(x.b),t:"Breed "+x.n+": "+usd(cost(x.b))})),1)+kvs([["Média",usd(Math.round(avg(cs)))],["Mais barato",usd(mnA(cs))],["Mais caro",usd(mxA(cs))]])+tbl(["Breed","Método","Ganho","Custo"],fi.map(x=>["#"+x.n,x.b.method,+x.b.rQ?sg(gainB(x.b)):"–",usd(cost(x.b))])))}
+  if(k==="cost"){const cs=f.map(cost);return cm("Custo por breed · "+esc(p.name),bars(fi.map(x=>({l:"#"+x.n,v:cost(x.b),t:"Breed "+x.n+": "+usd(cost(x.b))})),1)+kvs([["Média",usd(Math.round(avg(cs)))],["Mais barato",usd(mnA(cs))],["Mais caro",usd(mxA(cs))]])+tblL(["Breed","Método","Ganho","Custo"],fi.slice().reverse().map(x=>["#"+x.n,esc(x.b.method),+x.b.rQ?sg(gainB(x.b)):"–",usd(cost(x.b))])))}
   if(k==="q")return cm("Evolução da qualidade · "+esc(p.name),line(qpts(p,fi),1,q3)+kvs([["Inicial",q3(p.startQ)],["Atual",q3(cur(p).q)],["Ganho",sg(cur(p).q-p.startQ)]]),"Qualidade ao final de cada breed.");
   if(k==="add"){const T=catT(f,pendFab(p)),hf=T.fab>0,K=hf?[CAT[1],CAT[2],CAT[4]]:CAT.slice(1,3);return cm("Gastos adicionais · "+esc(p.name),stack(fi.map(x=>({l:"#"+x.n,p:hf?[foodC(x.b),stC(x.b),fabC(x.b)]:[foodC(x.b),stC(x.b)]})),K)+lg(K)+kvs([["Total",usd(T.food+T.st+T.fab)],["Foods",usd(T.food)],["Stones",usd(T.st)],...(hf?[["Fabricação",usd(T.fab)]]:[])]))}
   if(k==="add_fab"){const fs=p.fabs||[];return cm("Foods fabricadas · "+esc(p.name),bars(fs.map((x,i)=>({l:"F"+(i+1),v:fabCost(x),t:x.name+" "+q3(fabCur(x).q)+": "+usd(fabCost(x))})),1)+kvs([["Total",usd(sum(fs.map(fabCost)))],["Foods",fs.length],["Breeds de fabricação",sum(fs.map(x=>fin(x).length))]])+tbl(["Food","Qualidade","Breeds","Status","Custo"],fs.map((x,i)=>["F"+(i+1)+" · "+esc(x.name),q3(x.q)+" → "+q3(fabCur(x).q),fin(x).length,fabSt(p,x),usd(fabCost(x))])),"Custo de cada food: base comprada + breeds dela.")}
   if(k==="add_food"||k==="add_stone"){const fd=k==="add_food",fn=fd?foodC:stC,vs=f.map(fn);return cm((fd?"Foods":"Stones")+" · "+esc(p.name),bars(fi.map(x=>({l:"#"+x.n,v:fn(x.b),t:"Breed "+x.n+": "+usd(fn(x.b))})),1)+kvs([["Total",usd(sum(vs))],["Média por breed",usd(Math.round(avg(vs)))],["Breeds com compra",vs.filter(v=>v>0).length+" de "+vs.length]]))}
   if(k==="price_stone"||k==="price_food"){const sk=k==="price_stone",r=sk?stBuys(p,ts):foodBuys(p),st=pstat(r,sk);
-    return cm((sk?"Preço da stone"+(ts?" · "+esc(ts):""):"Preço das foods")+" · "+esc(p.name),line(r.map(x=>({v:x.price,l:"#"+x.n,t:"Breed "+x.n+": "+usd(x.price)})),1)+(st.n?kvs([["Mínimo",usd(st.min)],["Média",usd(st.avg)],["Máximo",usd(st.max)],["Último",usd(st.last)]])+tbl(sk?["Breed","Qtd","Valor (un)","Total"]:["Breed","Valor"],r.map(x=>sk?["#"+x.n,x.qty,usd(x.price),usd(x.qty*x.price)]:["#"+x.n,usd(x.price)])):""),sk?"Valor por unidade; a média considera a quantidade comprada.":"Valor pago em cada food.")}
+    return cm((sk?"Preço da stone"+(ts?" · "+esc(ts):""):"Preço das foods")+" · "+esc(p.name),line(r.map(x=>({v:x.price,l:"#"+x.n,t:"Breed "+x.n+": "+usd(x.price)})),1)+(st.n?kvs([["Mínimo",usd(st.min)],["Média",usd(st.avg)],["Máximo",usd(st.max)],["Último",usd(st.last)]])+tblL(sk?["Breed","Qtd","Valor (un)","Total"]:["Breed","Valor"],r.slice().reverse().map(x=>sk?["#"+x.n,x.qty,usd(x.price),usd(x.qty*x.price)]:["#"+x.n,usd(x.price)])):""),sk?"Valor por unidade; a média considera a quantidade comprada.":"Valor pago em cada food.")}
   return"";
 }
 
@@ -606,15 +614,16 @@ function detail(p){
   ${cc("q","Evolução da qualidade",sg(g),q3(p.startQ)+" → "+q3(c.q),`<div class="qw">${line(qpts(p,fi),1,q3,900)}</div><div class="qn">${line(qpts(p,fi))}</div>`,p.id).replace('class="card cc"','class="card cc wide"')}
   </div>
   `}
-  <div class="reft">Preços que você já pagou · valor por unidade</div>
-  <div class="info">${(pst(p).length?pst(p):[""]).map(t=>priceCard("price_stone"+(t?"|"+t:""),"Stone","<span style='display:contents'>"+stoneImg(t)+"</span>",pstat(stBuys(p,t),true),esc(t||"stone não definida"),[],p.id)).join("")}
-  ${priceCard("price_food","Foods","🍖",fb,"valor por food",foodBuys(p).map(x=>({v:x.price,l:"#"+x.n})),p.id)}</div>
-  ${!p.stone?`<div class="warn">Defina a stone deste Pokémon em “Editar Pokémon” para ela já vir selecionada nos novos breeds.</div>`:""}
   ${fabSection(p)}
   <div class="row" style="flex-wrap:wrap;margin-top:26px"><b>Breeds</b><span class="sp"></span><button class="pri" data-act="newb" data-id="${p.id}">+ Novo breed</button><button class="sm" data-act="editp" data-id="${p.id}">Editar Pokémon</button><button class="sm" data-act="delp" data-id="${p.id}">Excluir Pokémon</button></div>
   <div class="tl" style="margin-top:12px">${act.map(x=>bc(p,x.b,x.n)).join("")||(old.length?'<p class="mu">Nenhum breed em andamento.</p>':'<p class="mu">Nenhum breed registrado ainda. Clique em "+ Novo breed" para começar.</p>')}
   ${old.length?`<div class="tog"><button class="sm" data-act="togdone">${ui.hideDone?"Mostrar":"Ocultar"} finalizados (${old.length})</button></div>`:""}
-  ${ui.hideDone?"":old.map(x=>bc(p,x.b,x.n)).join("")}</div>`;
+  ${ui.hideDone?"":old.map(x=>bc(p,x.b,x.n)).join("")}</div>
+  <div class="reft">Preços que você já pagou · valor por unidade</div>
+  <div class="info">${(pst(p).length?pst(p):[""]).map(t=>priceCard("price_stone"+(t?"|"+t:""),"Stone","<span style='display:contents'>"+stoneImg(t)+"</span>",pstat(stBuys(p,t),true),esc(t||"stone não definida"),[],p.id)).join("")}
+  ${priceCard("price_food","Foods","🍖",fb,"valor por food",foodBuys(p).map(x=>({v:x.price,l:"#"+x.n})),p.id)}</div>
+  ${!p.stone?`<div class="warn">Defina a stone deste Pokémon em “Editar Pokémon” para ela já vir selecionada nos novos breeds.</div>`:""}
+`;
 }
 /* ===== Preço atual do market (F2W Market) =====
    Só aparece quando MARKET_URL e MARKET_KEY estão preenchidos no config.js e a função bt_prices existe no banco do Market.
@@ -627,7 +636,7 @@ async function fillMkt(){if(!MKT)return;const m=ui.modal,p=P(m.pid);if(!p)return
     const r=await fetch(mkBase()+"/rest/v1/rpc/bt_prices",{method:"POST",headers:h,body:JSON.stringify({p_stones:pst(p),p_species:sp,p_qmin:Math.max(0,fq-MAXDIF),p_qmax:fq})});
     if(!r.ok)return;_mk={k:key,at:Date.now(),d:await r.json()}}catch(e){return}}
   const d=_mk.d||{},put=(k,v)=>document.querySelectorAll(`[data-mk="${k}"]`).forEach(e=>e.innerHTML=v);
-  for(const t of pst(p)){const v=d.stones&&d.stones[t];put("st:"+t,v?`market agora <b>${usd(v)}</b>`:"")}
+  for(const t of pst(p)){const v=d.stones&&d.stones[t];document.querySelectorAll(`[data-mk="st:${t}"]`).forEach(e=>e.innerHTML=v?`market agora <b>${usd(v)}</b><button type="button" class="mkcp" data-act="mkcp" data-i="${e.dataset.i}" data-v="${v}" title="Usar este preço" aria-label="Usar este preço">↓</button>`:"")}
   put("fero",d.fero?`Strange Pheromone no market agora: <b>${usd(d.fero)}</b>`:"");
   put("food",d.food&&d.food.price?`Food mais barata no market agora (${esc(sp)} ${q3(d.food.q)}, IV ${esc(d.food.iv)}): <b>${usd(d.food.price)}</b>`:"");
 }
@@ -805,7 +814,7 @@ Meu nick: ${esc(nk)}</pre>
   if(m.t==="fab"){const p=P(m.pid),e={...(m.edit?F(p,m.fid):{name:p.name,iv:"",q:"",bought:true,price:""}),...(m.draft||{})},bo=m.bo!==undefined?m.bo:!!e.bought;
     return`<div class="modal"><div class="card"><b class="big">${m.edit?"Editar food fabricada":"Nova food fabricada"}</b><div class="mu">A base que você vai subir de qualidade para usar como food do ${esc(p.name)}. Depois registre os breeds dela no botão "+ Breed".</div>
   <form data-form="fab">${dl}<div class="f3">${inp("Pokémon","name",e.name,"text",'list="dl-pk" autocomplete="off"')}${inp("IV","iv",e.iv,"number")}${inp("Qualidade da base","q",e.q,"number")}</div>
-  <div class="f2">${tog("Comprei esta base","bought",bo)}${bo?money("Valor pago","price",e.price):"<div></div>"}</div>
+  <div class="f2">${tog("Comprou esta base?","bought",bo)}${bo?money("Valor pago","price",e.price):"<div></div>"}</div>
   <div class="hint">Lembrete: o filhote herda o IV do pai de maior qualidade, e os dois pais não podem ter mais de 0.150 de diferença.</div>
   <div class="row" style="margin-top:14px"><span class="sp"></span><button type="button" data-act="close">Cancelar</button><button class="pri">${m.edit?"Salvar":"Criar"}</button></div></form></div></div>`}
   const b=m.b,p=P(m.pid),fz=m.fid?F(p,m.fid):null,S_=["Não iniciado","Chocando","Finalizado"],fw=foodMsg(b.tQ,b.fQ);
@@ -814,8 +823,8 @@ Meu nick: ${esc(nk)}</pre>
   <div class="row" style="margin-top:14px"><span class="sp"></span><button type="button" data-act="close">Cancelar</button><button class="pri">Salvar resultado</button></div></form></div></div>`;
   const fero=b.method==="Feromônio";
   const sec=(n,t,h,body)=>`<div class="sec"><div class="sh"><span class="n">${n}</span><div><b>${t}</b>${h?`<div class="mu">${h}</div>`:""}</div></div>${body}</div>`;
-  const stones=b.stones.map((x,i)=>{const tp=x.type||pst(p)[i]||"";return`<div class="stb"><input type="hidden" name="st_type_${i}" value="${esc(tp)}"><div class="row">${stoneImg(tp)}<b>${esc(tp||"Stone não definida")}</b><span class="sp"></span><span class="mkt" data-mk="st:${esc(tp)}"></span></div>${tp?"":'<div class="mu">Defina a stone em “Editar Pokémon”.</div>'}
-  <div class="f3">${tog("Comprou","st_bought_"+i,x.bought)}${x.bought?inp("Quantidade","st_qty_"+i,x.qty,"number")+money("Valor (un)","st_price_"+i,x.price):""}</div></div>`}).join("");
+  const stones=b.stones.map((x,i)=>{const tp=x.type||pst(p)[i]||"";return`<div class="stb"><input type="hidden" name="st_type_${i}" value="${esc(tp)}"><div class="row">${stoneImg(tp)}<b>${esc(tp||"Stone não definida")}</b><span class="sp"></span><span class="mkt" data-mk="st:${esc(tp)}" data-i="${i}"></span></div>${tp?"":'<div class="mu">Defina a stone em “Editar Pokémon”.</div>'}
+  <div class="f3">${tog("Comprou?","st_bought_"+i,x.bought)}${x.bought?inp("Quantidade","st_qty_"+i,x.qty,"number")+money("Valor (un)","st_price_"+i,x.price):""}</div></div>`}).join("");
   /* foods fabricadas disponíveis para este breed (só nos breeds do alvo) */
   const avail=fz?[]:(p.fabs||[]).filter(f=>{const u=fabUsedBy(p,f);return(!u||u.id===b.id)&&!f.breeds.some(x=>x.status==="Chocando")}),useFab=!fz&&b.fabOn;
   const fabPick=useFab?(avail.length?`<div class="fabsel"><label>Qual food fabricada?</label><select name="fab"><option value="">Escolha…</option>${avail.map(f=>{const c=fabCur(f);return`<option value="${f.id}" ${f.id===b.fab?"selected":""}>F${p.fabs.indexOf(f)+1} · ${esc(f.name)} · IV ${esc(c.iv)} · ${q3(c.q)} · ${usd(fabCost(f))}</option>`}).join("")}</select></div>`:`<div class="warn">Nenhuma food fabricada disponível. Crie uma em "Foods fabricadas", na página do Pokémon.</div>`):"";
@@ -825,16 +834,16 @@ Meu nick: ${esc(nk)}</pre>
   <form data-form="b">${dl}
   ${sec(++n,"Informações do breed","",`<div class="f2">${sel("Status","status",b.status,S_)}${sel("Método","method",b.method,["Grátis","Feromônio"])}</div>${inp("Data / horário","date",b.date)}`)}
   ${sec(++n,fz?"Food que está sendo fabricada":"Pokémon inicial",fz?"Valores atuais da food fabricada.":"O Pokémon que você já tem (valores atuais).",`<div class="f2">${inp("IV","tIV",b.tIV,"number")}${inp("Qualidade","tQ",b.tQ,"number")}</div>`)}
-  ${sec(++n,"Food","O Pokémon que será usado como food neste breed.",`${fz?"":tog("Usar uma food fabricada","fabOn",useFab)}${fabPick}<div class="err fqwarn" id="fqwarn" style="display:${fw?"block":"none"}">${fw}</div><div class="f3">${inp("Nome","fName",b.fName,"text",'list="dl-pk" autocomplete="off" '+ro)}${inp("IV","fIV",b.fIV,"number",ro)}${inp("Qualidade","fQ",b.fQ,"number",(fw?'class="bad" ':"")+ro)}</div>`)}
-  ${fero?sec(++n,"Feromônio","",`<div class="f3">${tog("Comprou fero","feroBought",b.feroBought)}${b.feroBought?inp("Quantidade","feroQty",b.feroQty,"number")+money("Valor (un)","feroPrice",b.feroPrice):""}</div><span class="mkt" data-mk="fero"></span>`):""}
+  ${sec(++n,"Food","O Pokémon que será usado como food neste breed.",`${fz?"":`<div class="f2">${tog("Usar food fabricada?","fabOn",useFab)}<div></div></div>`}${fabPick}<div class="err fqwarn" id="fqwarn" style="display:${fw?"block":"none"}">${fw}</div><div class="f3">${inp("Nome","fName",b.fName,"text",'list="dl-pk" autocomplete="off" '+ro)}${inp("IV","fIV",b.fIV,"number",ro)}${inp("Qualidade","fQ",b.fQ,"number",(fw?'class="bad" ':"")+ro)}</div>`)}
+  ${fero?sec(++n,"Feromônio","",`<div class="f3">${tog("Comprou fero?","feroBought",b.feroBought)}${b.feroBought?inp("Quantidade","feroQty",b.feroQty,"number")+money("Valor (un)","feroPrice",b.feroPrice):""}</div><span class="mkt" data-mk="fero"></span>`):""}
   ${sec(++n,"Gastos adicionais","Tudo em dólar ($). Só preencha o que você comprou.",`
-    <div class="sub"><b>Food</b>${useFab?`<div class="mu" style="margin-top:6px">Food fabricada: o custo dela (${usd(fabC(b))}) entra neste breed.</div>`:`<div class="f2">${tog("Comprou a food","foodBought",b.foodBought)}${b.foodBought?money("Valor da food","foodPrice",b.foodPrice):"<div></div>"}</div><span class="mkt" data-mk="food"></span>`}</div>
-    <div class="sub"><b>Stones</b>${tog("Usou Double Stone (40 stones, 5% de +1 no IV)","dbl",b.dbl)}${stones}</div>
+    <div class="sub"><b>Food</b>${useFab?`<div class="mu" style="margin-top:6px">Food fabricada: o custo dela (${usd(fabC(b))}) entra neste breed.</div>`:`<div class="f2">${tog("Comprou a food?","foodBought",b.foodBought)}${b.foodBought?money("Valor da food","foodPrice",b.foodPrice):"<div></div>"}</div><span class="mkt" data-mk="food"></span>`}</div>
+    <div class="sub"><b>Stones</b>${tog("Usou Double Stone? (5% de +1 no IV)","dbl",b.dbl,["Sim","Não"])}${stones}</div>
     <div class="fix"><span>Custo fixo por breed (já incluso no custo)</span><b>${usd(b.fixed)}</b></div>`)}
   <div class="row" style="margin-top:14px">${m.edit?'<button type="button" data-act="delb">Excluir</button>':""}<span class="sp"></span><button type="button" data-act="close">Cancelar</button><button class="pri">Salvar</button></div></form></div></div>`;
 }
 /* toggle de formulário: envia "Sim" ligado e "Não" desligado */
-const tog=(l,k,on)=>`<label class="tg"><input type="hidden" name="${k}" value="Não"><input type="checkbox" name="${k}" value="Sim" ${on?"checked":""}><span class="sw"></span>${l}</label>`;
+const tog=(l,k,on,o=["Não","Sim"])=>sel(l,k,on?"Sim":"Não",o);
 /* regra do jogo: os pais podem ter no máximo 0,150 de diferença; o filhote herda o IV do pai de MAIOR qualidade */
 function foodMsg(tq,fq){tq=toN(tq);fq=toN(fq);if(!(tq>0&&fq>0))return"";
   if(fq>tq+MAXDIF+1e-9||fq<tq-MAXDIF-1e-9)return`⚠ Diferença de ${q3(Math.abs(tq-fq))}: o jogo só cruza até 0.150. Food precisa ficar entre ${q3(Math.max(0,tq-MAXDIF))} e ${q3(tq+MAXDIF)}.`;
@@ -882,7 +891,11 @@ document.addEventListener("click",async e=>{
   if(a==="editfab"){ui.modal={t:"fab",pid:id,fid,edit:true};return render()}
   if(a==="delfab"){const p=P(id),f=F(p,fid),u=fabUsedBy(p,f);
     if(confirm(u?`Esta food está ligada ao Breeding ${p.breeds.indexOf(u)+1}. Excluir mesmo assim? O custo dela sai desse breed.`:"Excluir esta food fabricada e os breeds dela?")){if(u)u.fab="";p.fabs=p.fabs.filter(x=>x.id!==fid);save()}return render()}
-  if(a==="chart"){ui.modal={t:"c",k:t.dataset.k,pid:t.dataset.id||null};return render()}
+  /* seta do market: copia o preço para a caixa "Valor (un)" da stone (marca "Comprou? Sim" se precisar) */
+  if(a==="mkcp"){const f=t.closest("form"),i=+t.dataset.i,v=+t.dataset.v,el=f&&f.elements["st_price_"+i];
+    if(el){el.value=v;el.classList.add("got");setTimeout(()=>el.classList.remove("got"),700)}else if(f){ui.modal.b=readForm(f,ui.modal.b);const x=ui.modal.b.stones[i];if(x){x.bought=true;x.price=v}keepScroll()}return}
+  if(a==="allrows"){ui.allRows=!ui.allRows;return keepScroll()}
+  if(a==="chart"){ui.allRows=false;ui.modal={t:"c",k:t.dataset.k,pid:t.dataset.id||null};return render()}
   if(a==="editp"){ui.modal={t:"p",edit:true,pid:id};return render()}
   if(a==="togan"){ui.hideAn=!ui.hideAn;Store.set("piw_hideAn",ui.hideAn);return render()}
   if(a==="togsim"){ui.hideSim=!ui.hideSim;Store.set("piw_hideSim",ui.hideSim);return render()}
