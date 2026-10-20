@@ -260,6 +260,12 @@ button.linkbtn:active{transform:none}
 @media(max-width:640px){.sim .simin{grid-template-columns:1fr}.fabs{grid-template-columns:1fr}}
 .fabsel{margin-top:6px}
 input[readonly]{opacity:.75}
+/* fundo pulsando na cor da raridade */
+.av.glow{position:relative;border-color:color-mix(in srgb,var(--rc) 55%,var(--rim))}
+.av.glow,.av.glow:has(img),.av.glow:has(.gs){background:var(--bg)}
+.av.glow:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 55%,color-mix(in srgb,var(--rc) 60%,transparent),transparent 70%);animation:avpulse 2.8s ease-in-out infinite;pointer-events:none}
+.av.glow>*{position:relative;z-index:1}
+@keyframes avpulse{0%,100%{opacity:.3;transform:scale(.88)}50%{opacity:.8;transform:scale(1.04)}}
 @media(max-width:560px){header{grid-template-columns:1fr}.hl{justify-content:center}.hr{justify-content:center;flex-wrap:wrap}}
 </style>
 </head>
@@ -325,10 +331,15 @@ const GAME_ASSETS="https://poke.idleworld.online/game/asset-packs/outfits/male/"
 const nkey=s=>String(s||"").toLowerCase().replace(/[^a-z0-9]/g,"");
 let GSP=new Map();
 async function loadGame(){try{const r=await fetch("game_species.json");if(!r.ok)throw 0;const j=await r.json();GSP=new Map(j.map(x=>[nkey(x.n),x]));NAMES=j.map(x=>x.n).sort((a,b)=>a.localeCompare(b));if(!ui.modal)render()}catch(e){loadNames()}}
-const AVS={lg:160,sm:44,"":80};
-function gsprite(n,box){const g=GSP.get(nkey(n));if(!g||!g.s)return"";const[f,x,y,w,h,pw,ph]=g.s,k=Math.max(1,Math.floor(box*.8/Math.max(w,h)*4)/4);
-  return`<i class="gs" role="img" aria-label="${esc(n)}" style="width:${w*k}px;height:${h*k}px;background-image:url('${GAME_ASSETS}${f}');background-size:${pw*k}px ${ph*k}px;background-position:-${x*k}px -${y*k}px"></i>`}
-const spr=(n,cls="")=>{const gs=gsprite(n,AVS[cls]||80);if(gs)return`<span class="av ${cls}">${gs}</span>`;const k=slug(n),px=PIXEL&&PX[k+PXM],u=px||srcOf(k);return`<span class="av ${cls}" data-pk="${esc(n)}">${u?imgTag(u,n,!!px):esc((n||"?").charAt(0).toUpperCase())}</span>`};
+/* tamanho do sprite dentro da moldura: [lado da moldura, quanto dela o sprite ocupa] */
+const AVS={lg:[160,.72],sm:[44,.8],"":[80,.6]};
+function gsprite(n,cls){const g=GSP.get(nkey(n));if(!g||!g.s)return"";const[box,fill]=AVS[cls]||AVS[""],[f,xs,y,w,h,pw,ph]=g.s,k=Math.max(1,Math.floor(box*fill/Math.max(w,h)*4)/4);
+  return`<i class="gs" role="img" aria-label="${esc(n)}" data-xs="${xs.map(x=>x*k).join(",")}" data-y="${y*k}" style="width:${w*k}px;height:${h*k}px;background-image:url('${GAME_ASSETS}${f}');background-size:${pw*k}px ${ph*k}px;background-position:-${xs[0]*k}px -${y*k}px"></i>`}
+/* rc = cor da raridade (fundo pulsando atrás do sprite) */
+const spr=(n,cls="",rc)=>{const gl=rc?` glow" style="--rc:${rc}`:"",gs=gsprite(n,cls);if(gs)return`<span class="av ${cls}${gl}">${gs}</span>`;const k=slug(n),px=PIXEL&&PX[k+PXM],u=px||srcOf(k);return`<span class="av ${cls}${gl}" data-pk="${esc(n)}">${u?imgTag(u,n,!!px):esc((n||"?").charAt(0).toUpperCase())}</span>`};
+/* animação: troca o quadro do sprite (mesmo ritmo do jogo, ~4 quadros por segundo) */
+let _tick=0;const _calm=(()=>{try{return matchMedia("(prefers-reduced-motion: reduce)").matches}catch(e){return false}})();
+if(!_calm)setInterval(()=>{_tick++;document.querySelectorAll(".gs[data-xs]").forEach(e=>{const xs=e.dataset.xs.split(",");if(xs.length>1)e.style.backgroundPosition=`-${xs[_tick%xs.length]}px -${e.dataset.y}px`})},250);
 const busy={};
 async function hydrate(){
   const ks=[...new Set([...document.querySelectorAll("[data-pk]")].filter(e=>!e.querySelector("img")).map(e=>slug(e.dataset.pk)))].filter(k=>k&&!busy[k]);
@@ -562,7 +573,7 @@ function home(){
 function pc(p){
   const c=cur(p),d=fin(p).length,g=c.q-p.startQ,ch=p.breeds.some(b=>b.status==="Chocando"),
     tip=(ch?"Chocando":"Parado")+" · conta: "+(p.acc||"não informada");
-  return`<div class="card pk" data-act="open" data-id="${p.id}"><div class="row">${spr(p.name)}<div><b>${esc(p.name)}</b><div class="mu">IV ${p.startIV===c.iv?c.iv:p.startIV+" → "+c.iv}</div><div class="mu">${d} breeds</div></div><span class="sp"></span><div class="pst"><span class="stt ${ch?"Chocando":""}" title="${esc(tip)}"><i></i>${ch?"Chocando":"Parado"}</span>${rt(c.q)}</div></div>
+  return`<div class="card pk" data-act="open" data-id="${p.id}"><div class="row">${spr(p.name,"",rar(c.q)[1])}<div><b>${esc(p.name)}</b><div class="mu">IV ${p.startIV===c.iv?c.iv:p.startIV+" → "+c.iv}</div><div class="mu">${d} breeds</div></div><span class="sp"></span><div class="pst"><span class="stt ${ch?"Chocando":""}" title="${esc(tip)}"><i></i>${ch?"Chocando":"Parado"}</span>${rt(c.q)}</div></div>
   <div class="row" style="margin-top:12px;flex-wrap:wrap"><div class="ini"><small>Inicial</small>${q3(p.startQ)}</div><span class="arr">→</span><div class="ini"><small>Atual</small><b>${q3(c.q)}</b></div><span class="${g>0?"up":"eq"}">${sg(g)}</span></div>
   <div class="row" style="margin-top:10px;padding-top:8px;border-top:1px solid var(--line)"><span class="lbl">Gasto total</span><span class="sp"></span><span class="usd">${usd(totalCost(p))}</span></div></div>`;
 }
@@ -575,7 +586,7 @@ function detail(p){
     sb=pstat(stBuys(p),true),fb=pstat(foodBuys(p),false),pf=pendFab(p);
   const act=p.breeds.map((b,i)=>({b,n:i+1})).filter(x=>x.b.status!=="Finalizado").reverse(),old=p.breeds.map((b,i)=>({b,n:i+1})).filter(x=>x.b.status==="Finalizado").reverse();
   return`<button class="sm" data-act="home">← Voltar</button>
-  <div class="card hero" style="margin-top:10px"><div class="row" style="flex-wrap:wrap">${spr(p.name,"lg")}<div><div class="big">${esc(p.name)}</div><div class="mu">${p.breeds.length} breeds registrados${(p.fabs||[]).length?" · "+p.fabs.length+" foods fabricadas":""}</div></div><span class="sp"></span>
+  <div class="card hero" style="margin-top:10px"><div class="row" style="flex-wrap:wrap">${spr(p.name,"lg",rar(c.q)[1])}<div><div class="big">${esc(p.name)}</div><div class="mu">${p.breeds.length} breeds registrados${(p.fabs||[]).length?" · "+p.fabs.length+" foods fabricadas":""}</div></div><span class="sp"></span>
   <div class="row" style="gap:28px;align-items:flex-start"><div style="text-align:right"><div class="lbl">IV atual</div><div class="big">${c.iv}</div></div><div style="text-align:right"><div class="lbl">Qualidade atual</div><div class="big">${q3(c.q)}</div>${rt(c.q)}</div></div></div>
   <div class="bar"></div>
   <div class="row foot"><div>IV inicial <b>${p.startIV}</b> → Qualidade Inicial <b>${p.startQ}</b></div></div></div>
@@ -584,9 +595,9 @@ function detail(p){
   <div class="stat"><div class="lbl">Breeds finalizados</div><div class="big">${f.length}</div><div class="mu">${p.breeds.length} no total</div></div>
   <div class="stat"><div class="lbl">Custo médio</div><div class="big usd">${usd(f.length?Math.round(bcT/f.length):0)}</div><div class="mu">por breed</div></div>
   <div class="stat"><div class="lbl">Custo por +0,001</div><div class="big usd">${g>0?usd(Math.round(tc/(g*1000))):"–"}</div><div class="mu">de qualidade</div></div></div>
-  <div class="sech row" style="margin-top:26px"><span>Quanto falta</span><span class="sp"></span>${tgl("hideSim",!ui.hideSim,"Mostrar")}</div>
+  <div class="sech row" style="margin:22px 0 10px"><span>Quanto falta</span><span class="sp"></span><button class="sm" data-act="togsim" style="text-transform:none;letter-spacing:0;font-weight:400">${ui.hideSim?"Mostrar":"Ocultar"}</button></div>
   ${ui.hideSim?"":simCard(p)}
-  <div class="sech row" style="margin-top:26px"><span>Análises${ui.hideAn?"":" · clique para ver o gráfico"}</span><span class="sp"></span>${tgl("hideAn",!ui.hideAn,"Mostrar")}</div>
+  <div class="sech row" style="margin:${ui.hideSim?"8px":"22px"} 0 10px"><span>Análises${ui.hideAn?"":" · clique para ver o gráfico"}</span><span class="sp"></span><button class="sm" data-act="togan" style="text-transform:none;letter-spacing:0;font-weight:400">${ui.hideAn?"Mostrar":"Ocultar"}</button></div>
   ${ui.hideAn?"":`
   <div class="cgrid cg3">
   ${cc("gain","Melhor breed e ganho mais comum",B?`<span class="up">${sg(B.g)}</span>`:"–",B?`ocorreu ${B.c}× · mais comum: ${sg(CM.g)} (${CM.c}×)`:"sem resultados",bars(histItems(H)),p.id)}
@@ -602,7 +613,7 @@ function detail(p){
   ${fabSection(p)}
   <div class="row" style="flex-wrap:wrap;margin-top:26px"><b>Breeds</b><span class="sp"></span><button class="pri" data-act="newb" data-id="${p.id}">+ Novo breed</button><button class="sm" data-act="editp" data-id="${p.id}">Editar Pokémon</button><button class="sm" data-act="delp" data-id="${p.id}">Excluir Pokémon</button></div>
   <div class="tl" style="margin-top:12px">${act.map(x=>bc(p,x.b,x.n)).join("")||(old.length?'<p class="mu">Nenhum breed em andamento.</p>':'<p class="mu">Nenhum breed registrado ainda. Clique em "+ Novo breed" para começar.</p>')}
-  ${old.length?`<div class="tog">${tgl("hideDone",!ui.hideDone,"Mostrar finalizados ("+old.length+")")}</div>`:""}
+  ${old.length?`<div class="tog"><button class="sm" data-act="togdone">${ui.hideDone?"Mostrar":"Ocultar"} finalizados (${old.length})</button></div>`:""}
   ${ui.hideDone?"":old.map(x=>bc(p,x.b,x.n)).join("")}</div>`;
 }
 /* ===== Preço atual do market (F2W Market) =====
@@ -721,13 +732,13 @@ function simCard(p){const B=simBase(p),o=simOpts(p,B),fld=(l,k,v,ph,$)=>`<div><l
 /* ===== Foods fabricadas: seção na página do Pokémon ===== */
 function fabSection(p){
   const fs=(p.fabs||[]).map((f,i)=>({f,i})),open=fs.filter(x=>fabSt(p,x.f)!=="Usada").reverse(),used=fs.filter(x=>fabSt(p,x.f)==="Usada").reverse(),c=cur(p);
-  return`<div class="row" style="flex-wrap:wrap;margin-top:26px"><b>Foods fabricadas</b><span class="sp"></span>${used.length?tgl("showUsed",!!ui.showUsed,"Mostrar usadas ("+used.length+")"):""}<button class="sm" data-act="newfab" data-id="${p.id}">+ Nova food fabricada</button></div>
+  return`<div class="row" style="flex-wrap:wrap;margin-top:26px"><b>Foods fabricadas</b><span class="sp"></span>${used.length?`<button class="sm" data-act="togused">${ui.showUsed?"Ocultar":"Mostrar"} usadas (${used.length})</button>`:""}<button class="sm" data-act="newfab" data-id="${p.id}">+ Nova food fabricada</button></div>
   <div class="hint">A food precisa ter no mínimo a qualidade do alvo − 0.150. Para este ${esc(p.name)} agora: <b>${q3(Math.max(0,c.q-.15))}</b> ou mais. Quando não der para comprar uma food assim, fabrique aqui; o custo dela entra no breed onde for usada.</div>
   ${open.length||(ui.showUsed&&used.length)?`<div class="fabs">${open.map(x=>fabCard(p,x.f,x.i)).join("")}${ui.showUsed?used.map(x=>fabCard(p,x.f,x.i)).join(""):""}</div>`:""}`;
 }
 function fabCard(p,f,i){
   const c=fabCur(f),st=fabSt(p,f),u=fabUsedBy(p,f),un=u?p.breeds.indexOf(u)+1:0,bs=f.breeds.map((b,j)=>({b,n:j+1})).reverse();
-  return`<div class="card fab"><div class="fh">${spr(f.name,"sm")}<div><b>F${i+1} · ${esc(f.name)}</b><div class="mu">IV ${esc(c.iv)} · ${q3(f.q)} → <b style="color:var(--tx)">${q3(c.q)}</b></div></div><span class="sp"></span><span class="fst ${st}">${st}${un?" · breed "+un:""}</span></div>
+  return`<div class="card fab"><div class="fh">${spr(f.name,"sm",rar(c.q)[1])}<div><b>F${i+1} · ${esc(f.name)}</b><div class="mu">IV ${esc(c.iv)} · ${q3(f.q)} → <b style="color:var(--tx)">${q3(c.q)}</b></div></div><span class="sp"></span><span class="fst ${st}">${st}${un?" · breed "+un:""}</span></div>
   <div class="kv"><div><small>Base</small>${f.bought?usd(+f.price||0):"já era sua"}</div><div><small>Breeds</small>${fin(f).length} de ${f.breeds.length}</div><div><small>Custo</small><b class="usd">${usd(fabCost(f))}</b></div></div>
   ${bs.length?`<div class="fl">${bs.map(x=>fabRow(p,f,x.b,x.n)).join("")}</div>`:""}
   <div class="fb">${st!=="Usada"?`<button class="sm pri" data-act="newb" data-id="${p.id}" data-fab="${f.id}">+ Breed</button>`:""}<button class="sm" data-act="editfab" data-id="${p.id}" data-fab="${f.id}">Editar</button><button class="sm" data-act="delfab" data-id="${p.id}" data-fab="${f.id}" title="Excluir food" aria-label="Excluir food">🗑️</button></div></div>`;
@@ -874,6 +885,8 @@ document.addEventListener("click",async e=>{
   if(a==="chart"){ui.modal={t:"c",k:t.dataset.k,pid:t.dataset.id||null};return render()}
   if(a==="editp"){ui.modal={t:"p",edit:true,pid:id};return render()}
   if(a==="togan"){ui.hideAn=!ui.hideAn;Store.set("piw_hideAn",ui.hideAn);return render()}
+  if(a==="togsim"){ui.hideSim=!ui.hideSim;Store.set("piw_hideSim",ui.hideSim);return render()}
+  if(a==="togused"){ui.showUsed=!ui.showUsed;return render()}
   if(a==="togdone"){ui.hideDone=!ui.hideDone;Store.set("piw_hide",ui.hideDone);return render()}
   if(a==="delbc"&&confirm("Excluir este breed? Essa ação não pode ser desfeita.")){delBreed(P(id),fid,t.dataset.b);save();return render()}
   if(a==="delb"&&confirm("Excluir este breed?")){delBreed(P(ui.modal.pid),ui.modal.fid,ui.modal.b.id);save();ui.modal=null;return render()}
