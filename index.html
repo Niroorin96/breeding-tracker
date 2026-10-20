@@ -404,7 +404,7 @@ const CH_FREE=[[.5,.005],[.35,.010],[.12,.020],[.03,.040]],CH_FERO=[[.5,.15],[.3
 const LINK_CONTATO=CFG.LINK_CONTATO||"https://exemplo.com/contato";
 const VERSION="v2.2.0";
 const foot=()=>`<footer class="ft">Desenvolvido por Niroo · <a href="${LINK_CONTATO}" target="_blank" rel="noopener">Contato</a></footer>`;
-let S={user:null,data:{projects:[]}},ui={modal:null,err:"",hideDone:!!Store.get("piw_hide"),hideAn:!!Store.get("piw_hideAn")};
+let S={user:null,data:{projects:[]}},ui={modal:null,err:"",hideDone:!!Store.get("piw_hide"),hideAn:!!Store.get("piw_hideAn"),hideSim:!!Store.get("piw_hideSim")};
 const isDark=()=>{const t=document.documentElement.getAttribute("data-theme");return t?t==="dark":true};
 const SYNC={ok:"☁ salvo",saving:"☁ salvando…",err:"⚠ sem conexão — salvo só neste aparelho",auth:"⚠ sessão expirada — saia e entre de novo"};
 function setSync(k){S.sync=k;const e=document.getElementById("syncst");if(e)e.textContent=CLOUD?(SYNC[k]||""):""}
@@ -467,7 +467,7 @@ function render(){
   <div class="err">${ui.err}</div><button class="pri" style="width:100%" data-act="login">Entrar</button><div style="text-align:center;margin-top:10px"><button type="button" class="linkbtn" data-act="forgot">Esqueceu o PIN?</button></div></div>${foot()}${ui.modal?modal():""}`;return}
   const m=location.hash.match(/^#\/p\/(\w+)/),p=m&&P(m[1]);
   a.innerHTML=`<header><div class="hl"><b data-act="home"><img class="pball" src="ICO.png" alt=""> Breeding Tracker</b><span class="ver">${VERSION}</span></div><div class="hc"><span>${esc(S.user)}</span><span class="mu" id="syncst">${CLOUD?esc(SYNC[S.sync]||""):""}</span></div>
-  <div class="hr"><button class="sm" data-act="guia">Guia</button><button class="sm themebtn" data-act="theme" title="Alternar modo claro/escuro">${isDark()?"☀️":"🌙"}</button><button class="sm" data-act="export">Exportar</button><button class="sm" data-act="import">Importar</button><button class="sm" data-act="logout">Sair</button></div></header>
+  <div class="hr"><button class="sm themebtn" data-act="theme" title="Alternar modo claro/escuro">${isDark()?"☀️":"🌙"}</button><button class="sm" data-act="guia">Guia</button><button class="sm" data-act="export">Exportar</button><button class="sm" data-act="import">Importar</button><button class="sm" data-act="logout">Sair</button></div></header>
   <main>${location.hash==="#/guia"?guia():p?detail(p):home()}</main>${foot()}${ui.modal?modal():""}${ui.warn?warnHtml():""}`;
   hydrate();if(ui.modal&&ui.modal.t==="b")fillMkt();
 }
@@ -584,7 +584,8 @@ function detail(p){
   <div class="stat"><div class="lbl">Breeds finalizados</div><div class="big">${f.length}</div><div class="mu">${p.breeds.length} no total</div></div>
   <div class="stat"><div class="lbl">Custo médio</div><div class="big usd">${usd(f.length?Math.round(bcT/f.length):0)}</div><div class="mu">por breed</div></div>
   <div class="stat"><div class="lbl">Custo por +0,001</div><div class="big usd">${g>0?usd(Math.round(tc/(g*1000))):"–"}</div><div class="mu">de qualidade</div></div></div>
-  ${simCard(p)}
+  <div class="sech row" style="margin-top:26px"><span>Quanto falta</span><span class="sp"></span>${tgl("hideSim",!ui.hideSim,"Mostrar")}</div>
+  ${ui.hideSim?"":simCard(p)}
   <div class="sech row" style="margin-top:26px"><span>Análises${ui.hideAn?"":" · clique para ver o gráfico"}</span><span class="sp"></span>${tgl("hideAn",!ui.hideAn,"Mostrar")}</div>
   ${ui.hideAn?"":`
   <div class="cgrid cg3">
@@ -608,10 +609,11 @@ function detail(p){
    Só aparece quando MARKET_URL e MARKET_KEY estão preenchidos no config.js e a função bt_prices existe no banco do Market.
    Mostra o menor preço anunciado agora (em Dollar) ao lado de stone, feromônio e food. */
 const MK_URL=CFG.MARKET_URL||"",MK_KEY=CFG.MARKET_KEY||"",MKT=!!(MK_URL&&MK_KEY);let _mk={k:"",at:0,d:null};
+const mkBase=()=>MK_URL.trim().replace(/\/+$/,"").replace(/\/rest\/v1$/,"");
 async function fillMkt(){if(!MKT)return;const m=ui.modal,p=P(m.pid);if(!p)return;const b=m.b,fq=toN(b.tQ),sp=(m.fid?F(p,m.fid).name:p.name);
   const key=[pst(p).join(","),sp,q3(fq)].join("|");
   if(_mk.k!==key||Date.now()-_mk.at>120000){try{const h={"Content-Type":"application/json",apikey:MK_KEY};if(MK_KEY.startsWith("eyJ"))h.Authorization="Bearer "+MK_KEY;
-    const r=await fetch(MK_URL.replace(/\/+$/,"")+"/rest/v1/rpc/bt_prices",{method:"POST",headers:h,body:JSON.stringify({p_stones:pst(p),p_species:sp,p_qmin:Math.max(0,fq-MAXDIF),p_qmax:fq})});
+    const r=await fetch(mkBase()+"/rest/v1/rpc/bt_prices",{method:"POST",headers:h,body:JSON.stringify({p_stones:pst(p),p_species:sp,p_qmin:Math.max(0,fq-MAXDIF),p_qmax:fq})});
     if(!r.ok)return;_mk={k:key,at:Date.now(),d:await r.json()}}catch(e){return}}
   const d=_mk.d||{},put=(k,v)=>document.querySelectorAll(`[data-mk="${k}"]`).forEach(e=>e.innerHTML=v);
   for(const t of pst(p)){const v=d.stones&&d.stones[t];put("st:"+t,v?`market agora <b>${usd(v)}</b>`:"")}
@@ -660,35 +662,61 @@ const MAXDIF=.15;
 const toN=v=>+String(v??"").replace(",",".")||0;
 function bDate(s){const m=String(s||"").match(/^(\d{1,2})-(\d{1,2})\s*\/\s*(\d{1,2}):(\d{2})/);if(!m)return null;const n=new Date(),d=new Date(n.getFullYear(),+m[2]-1,+m[1],+m[3],+m[4]);if(d-n>20*864e5)d.setFullYear(d.getFullYear()-1);return d}
 function simBase(p){
-  const f=fin(p).filter(b=>+b.rQ),gs=f.slice(-20).map(gainB).filter(x=>x>=0),l10=f.slice(-10),fp=foodBuys(p).slice(-5).map(x=>x.price),
+  const f=fin(p).filter(b=>+b.rQ),fr=f.filter(b=>b.method==="Feromônio"),fg=f.filter(b=>b.method!=="Feromônio"),
+    gs=fg.slice(-20).map(gainB).filter(x=>x>=0),gf=fr.slice(-20).map(gainB).filter(x=>x>=0),l10=fg.slice(-10),fp=foodBuys(p).slice(-5).map(x=>x.price),
+    fx=[...p.breeds,...(p.fabs||[]).flatMap(z=>z.breeds)].filter(b=>b.feroBought&&+b.feroPrice>0).map(b=>+b.feroPrice),
     ds=f.slice(-16).map(b=>bDate(b.date)).filter(Boolean),iv=[];
   for(let i=1;i<ds.length;i++){const h=(ds[i]-ds[i-1])/36e5;if(h>0&&h<24*7)iv.push(h)}
   iv.sort((a,b)=>a-b);
-  return{g:gs.length?avg(gs):.0096,n:gs.length,ac:l10.length?avg(l10.map(baseCost)):2e6,acNoFood:l10.length?avg(l10.map(b=>baseCost(b)-foodC(b))):2e6,food:fp.length?Math.round(avg(fp)):0,hrs:iv.length?iv[Math.floor(iv.length/2)]:0}}
-function simRun(p,goal,buyMax,food){
-  const B=simBase(p),g=B.g;let q=+cur(p).q,n=0,nf=0,fb=0,ct=0,fct=0,from=null;
+  /* sem histórico do método, usa a média das chances do jogo (Grátis +0,0096 · Feromônio +0,1875) */
+  const ev=t=>sum(t.map(x=>x[0]*x[1]));
+  return{g:gs.length?avg(gs):ev(CH_FREE),n:gs.length,gF:gf.length>=3?avg(gf):ev(CH_FERO),nF:gf.length,
+    ac:l10.length?avg(l10.map(baseCost)):2e6,acNoFood:l10.length?avg(l10.map(b=>baseCost(b)-foodC(b))):2e6,
+    food:fp.length?Math.round(avg(fp)):0,fero:fx.length?fx[fx.length-1]:0,hrs:iv.length?iv[Math.floor(iv.length/2)]:0}}
+/* Cada breed usa Grátis abaixo de "feromônio a partir de" e Feromônio (9 unidades) dali para cima.
+   A food precisa ter no mínimo (qualidade − 0,150). Até a maior food que dá pra comprar, ela é comprada;
+   acima disso é fabricada a partir dela, com breeds que seguem a mesma regra (e podem precisar de food fabricada também). */
+function simRun(p,goal,o){
+  const B=simBase(p),feroFrom=o.feroFrom>0?o.feroFrom:99,FQ=9;
+  const meth=q=>q>=feroFrom-1e-9?{g:B.gF,c:B.acNoFood+FQ*o.fero,f:1}:{g:B.g,c:B.acNoFood,f:0};
+  const memo=new Map();let guard=0;
+  /* custo de ter uma food com qualidade Q: {c: custo, nb: breeds de fabricação, nfe: breeds com feromônio} */
+  function food(Q){if(Q<=o.buyMax+1e-9)return{c:o.food,nb:0,nfe:0};const k=Math.round(Q*1000);if(memo.has(k))return memo.get(k);
+    let q=o.buyMax,c=o.food,nb=0,nfe=0;
+    while(q<Q-1e-9&&++guard<20000){const m=meth(q),fd=food(q-MAXDIF);c+=m.c+fd.c;nb+=1+fd.nb;nfe+=m.f+fd.nfe;q+=m.g}
+    const r={c,nb,nfe};memo.set(k,r);return r}
+  let q=+cur(p).q,n=0,nF=0,nfe=0,nf=0,fb=0,ct=0,fct=0,from=null;
   if(!(goal>q))return{B,n:0,done:true};
-  while(q<goal-1e-9&&n<3000){const need=q-MAXDIF;
-    if(need>buyMax+1e-9){const k=Math.ceil((need-buyMax)/g-1e-9),c=food+k*(B.acNoFood+food);nf++;fb+=k;fct+=c;ct+=B.acNoFood+c;if(from===null)from=q}
-    else ct+=B.ac;
-    q+=g;n++}
-  return{B,n,nf,fb,ct,fct,from}}
+  while(q<goal-1e-9&&n<3000&&guard<20000){const m=meth(q),need=q-MAXDIF;
+    if(need>o.buyMax+1e-9){const fd=food(need);nf++;fb+=fd.nb;nfe+=fd.nfe;fct+=fd.c;ct+=m.c+fd.c;if(from===null)from=q}
+    else ct+=m.c+o.food;
+    nF+=m.f;nfe+=m.f;q+=m.g;n++}
+  return{B,n,nF,nfe,nf,fb,ct,fct,from}}
 const dur=h=>h<24?Math.round(h)+" h":(h/24).toFixed(h<240?1:0).replace(".",",")+" dias";
+const simOpts=(p,B)=>({buyMax:toN(p.buyMax)||1.8,food:p.food18!==undefined&&p.food18!==""?toN(p.food18):B.food,
+  feroFrom:p.feroFrom!==undefined&&p.feroFrom!==""?toN(p.feroFrom):1.95,fero:p.feroPx!==undefined&&p.feroPx!==""?toN(p.feroPx):(B.fero||_mkFero||0)});
 function simOut(p){
-  const goal=toN(p.goal),bm=toN(p.buyMax)||1.8,B=simBase(p),food=p.food18!==undefined&&p.food18!==""?toN(p.food18):B.food;
-  const base=`Base: seus últimos ${B.n||"0"} breeds · ganho médio <b>${sg(B.g)}</b> · custo médio <b>${usd(Math.round(B.ac))}</b>${B.hrs?" · 1 breed a cada ~"+dur(B.hrs):""}${B.n?"":" (sem histórico: usando a chance do Grátis)"}`;
+  const goal=toN(p.goal),B=simBase(p),o=simOpts(p,B);
+  const base=`Base: Grátis <b>${sg(B.g)}</b> por breed${B.n?" (seus últimos "+B.n+")":" (chance do jogo)"} · Feromônio <b>${sg(B.gF)}</b>${B.nF>=3?" (seus últimos "+B.nF+")":" (chance do jogo)"} · custo sem food <b>${usd(Math.round(B.acNoFood))}</b> + 9 pheromones${B.hrs?" · 1 breed a cada ~"+dur(B.hrs):""}`;
   if(!goal)return`<div class="hint">Digite a meta para ver quantos breeds faltam e quanto deve custar.</div><div class="hint">${base}</div>`;
-  const r=simRun(p,goal,bm,food);
+  const r=simRun(p,goal,o);
   if(r.done)return`<div class="hint"><span class="up">Meta já alcançada.</span> Qualidade atual ${q3(cur(p).q)}.</div><div class="hint">${base}</div>`;
-  return`<div class="kv"><div><small>Breeds até ${q3(goal)}</small><b>${r.n}</b></div><div><small>Custo estimado</small><b class="usd">${usd(Math.round(r.ct))}</b></div>
+  const nG=r.n-r.nF;
+  return`<div class="kv"><div><small>Breeds até ${q3(goal)}</small><b>${r.n}</b><div class="mu">${nG} grátis · ${r.nF} com feromônio</div></div><div><small>Custo estimado</small><b class="usd">${usd(Math.round(r.ct))}</b>${r.nfe?`<div class="mu">${fmt(r.nfe*9)} pheromones</div>`:""}</div>
   <div><small>Foods fabricadas</small><b>${r.nf}</b>${r.nf?`<div class="mu">${r.fb} breeds de fabricação</div>`:""}</div><div><small>Tempo do alvo</small><b>${B.hrs?dur(r.n*B.hrs):"–"}</b></div></div>
-  ${r.nf?`<div class="hint">A partir de <b>${q3(bm+MAXDIF)}</b> cada breed precisa de food fabricada (média de ${usd(Math.round(r.fct/r.nf))} cada, já somada no custo).</div>`:`<div class="hint">Até a meta dá para usar foods de até ${q3(bm)} compradas.</div>`}
+  ${!o.fero&&r.nfe?`<div class="warn">Coloque o preço do Strange Pheromone para o custo dos breeds com feromônio entrar na conta.</div>`:""}
+  ${r.nf?`<div class="hint">A partir de <b>${q3(o.buyMax+MAXDIF)}</b> cada breed precisa de food fabricada (média de ${usd(Math.round(r.fct/r.nf))} cada, já somada no custo).</div>`:`<div class="hint">Até a meta dá para usar foods de até ${q3(o.buyMax)} compradas.</div>`}
   <div class="hint">${base}</div>`}
-function simCard(p){const B=simBase(p);
-  return`<div class="card sim" style="margin-top:14px"><div class="row cch"><span class="ict">🎯</span><div class="lbl">Quanto falta · simulador</div></div>
-  <div class="simin"><div><label>Meta de qualidade</label><input data-sim="goal" data-id="${p.id}" type="number" step="any" min="0" value="${esc(p.goal||"")}" placeholder="ex.: 2.000"></div>
-  <div><label>Maior food que dá pra comprar</label><input data-sim="buyMax" data-id="${p.id}" type="number" step="any" min="0" value="${esc(p.buyMax||1.8)}"></div>
-  <div><label>Preço de uma food dessa</label><div class="mny"><span>$</span><input data-sim="food18" data-id="${p.id}" type="number" step="any" min="0" value="${esc(p.food18!==undefined&&p.food18!==""?p.food18:B.food)}"></div></div></div>
+let _mkFero=0;
+/* preço atual do Strange Pheromone no market, usado como sugestão no simulador */
+async function loadMkFero(){if(!MKT||_mkFero)return;try{const h={"Content-Type":"application/json",apikey:MK_KEY};if(MK_KEY.startsWith("eyJ"))h.Authorization="Bearer "+MK_KEY;
+  const r=await fetch(mkBase()+"/rest/v1/rpc/bt_prices",{method:"POST",headers:h,body:JSON.stringify({p_stones:[],p_species:"",p_qmin:0,p_qmax:0})});if(!r.ok)return;const d=await r.json();_mkFero=+d.fero||0;
+  const m=location.hash.match(/^#\/p\/(\w+)/),p=m&&P(m[1]),i=document.querySelector('[data-sim="feroPx"]');if(p&&i&&(p.feroPx===undefined||p.feroPx==="")){i.value=_mkFero;const o=document.getElementById("simout");if(o)o.innerHTML=simOut(p)}}catch(e){}}
+function simCard(p){const B=simBase(p),o=simOpts(p,B),fld=(l,k,v,ph,$)=>`<div><label>${l}</label>${$?`<div class="mny"><span>$</span>`:""}<input data-sim="${k}" data-id="${p.id}" type="number" step="any" min="0" value="${esc(v)}"${ph?` placeholder="${ph}"`:""}>${$?"</div>":""}</div>`;
+  setTimeout(loadMkFero,0);
+  return`<div class="card sim"><div class="row cch"><span class="ict">🎯</span><div class="lbl">Quanto falta · simulador</div></div>
+  <div class="simin">${fld("Meta de qualidade","goal",p.goal||"","ex.: 2.000")}${fld("Feromônio a partir de","feroFrom",o.feroFrom,"")}${fld("Preço do Strange Pheromone (un)","feroPx",o.fero||"","preço por unidade",1)}
+  ${fld("Maior food que dá pra comprar","buyMax",o.buyMax,"")}${fld("Preço de uma food dessa","food18",o.food,"",1)}</div>
   <div id="simout" style="margin-top:6px">${simOut(p)}</div></div>`}
 /* ===== Foods fabricadas: seção na página do Pokémon ===== */
 function fabSection(p){
@@ -865,7 +893,7 @@ document.addEventListener("change",e=>{const f=e.target.closest('form[data-form=
   m.draft={name:v.name,iv:v.iv,q:v.q,price:v.price||""};keepScroll()}});
 /* toggles da tela (mostrar análises, finalizados, foods usadas) */
 document.addEventListener("change",e=>{const k=e.target.dataset&&e.target.dataset.tg;if(!k)return;const on=e.target.checked;
-  if(k==="hideAn"){ui.hideAn=!on;Store.set("piw_hideAn",ui.hideAn)}else if(k==="hideDone"){ui.hideDone=!on;Store.set("piw_hide",ui.hideDone)}else if(k==="showUsed")ui.showUsed=on;render()});
+  if(k==="hideAn"){ui.hideAn=!on;Store.set("piw_hideAn",ui.hideAn)}else if(k==="hideDone"){ui.hideDone=!on;Store.set("piw_hide",ui.hideDone)}else if(k==="showUsed")ui.showUsed=on;else if(k==="hideSim"){ui.hideSim=!on;Store.set("piw_hideSim",ui.hideSim)}render()});
 /* simulador: recalcula ao digitar e salva ao sair do campo */
 document.addEventListener("input",e=>{const k=e.target.dataset&&e.target.dataset.sim;if(!k)return;const p=P(e.target.dataset.id);if(!p)return;p[k]=e.target.value;const o=document.getElementById("simout");if(o)o.innerHTML=simOut(p)});
 document.addEventListener("change",e=>{if(e.target.dataset&&e.target.dataset.sim)save()});
