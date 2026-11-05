@@ -610,7 +610,7 @@ function detail(p){
   <div class="stat"><div class="lbl">Breeds finalizados</div><div class="big">${f.length}</div><div class="mu">${p.breeds.length} no total</div></div>
   <div class="stat"><div class="lbl">Custo médio</div><div class="big usd">${usd(f.length?Math.round(bcT/f.length):0)}</div><div class="mu">por breed</div></div>
   <div class="stat"><div class="lbl">Custo por +0,001</div><div class="big usd">${g>0?usd(Math.round(tc/(g*1000))):"–"}</div><div class="mu">de qualidade</div></div></div>
-  <div class="sech row" style="margin:22px 0 10px""><span>Análises${ui.hideAn?"":" · clique para ver o gráfico"}</span><span class="sp"></span><button class="sm" data-act="togan" style="text-transform:none;letter-spacing:0;font-weight:400">${ui.hideAn?"Mostrar":"Ocultar"}</button></div>
+  <div class="sech row" style="margin:22px 0 10px"><span>Análises${ui.hideAn?"":" · clique para ver o gráfico"}</span><span class="sp"></span><button class="sm" data-act="togan" style="text-transform:none;letter-spacing:0;font-weight:400">${ui.hideAn?"Mostrar":"Ocultar"}</button></div>
   ${ui.hideAn?"":`
   <div class="cgrid cg3">
   ${cc("gain","Melhor breed e ganho mais comum",B?`<span class="up">${sg(B.g)}</span>`:"–",B?`ocorreu ${B.c}× · mais comum: ${sg(CM.g)} (${CM.c}×)`:"sem resultados",bars(histItems(H)),p.id)}
@@ -842,7 +842,7 @@ Meu nick: ${esc(nk)}</pre>
   <form data-form="b">${dl}
   ${sec(++n,"Informações do breed","",`<div class="f2">${sel("Status","status",b.status,S_)}${sel("Método","method",b.method,["Grátis","Feromônio"])}</div>${inp("Data / horário","date",b.date)}`)}
   ${sec(++n,fz?"Food que está sendo fabricada":"Pokémon inicial",fz?"Valores atuais da food fabricada.":"O Pokémon que você já tem (valores atuais).",`<div class="f2">${inp("IV","tIV",b.tIV,"number")}${inp("Qualidade","tQ",b.tQ,"number")}</div>`)}
-  ${sec(++n,"Food","O Pokémon que será usado como food neste breed.",<div class="f2">${tog("Usar food fabricada? (Não = food comprada)","fabOn",useFab)}<div></div></div>${fabPick}<div class="err fqwarn" id="fqwarn" style="display:${fw?"block":"none"}">${fw}</div><div class="f3">${inp("Nome","fName",b.fName,"text",'list="dl-pk" autocomplete="off" '+ro)}${inp("IV","fIV",b.fIV,"number",ro)}${inp("Qualidade","fQ",b.fQ,"number",(fw?'class="bad" ':"")+ro)}</div>`)}
+  ${sec(++n,"Food","O Pokémon que será usado como food neste breed.",`<div class="f2">${tog("Usar food fabricada? (Não = food comprada)","fabOn",useFab)}<div></div></div>${fabPick}<div class="err fqwarn" id="fqwarn" style="display:${fw?"block":"none"}">${fw}</div><div class="f3">${inp("Nome","fName",b.fName,"text",'list="dl-pk" autocomplete="off" '+ro)}${inp("IV","fIV",b.fIV,"number",ro)}${inp("Qualidade","fQ",b.fQ,"number",(fw?'class="bad" ':"")+ro)}</div>`)}
   ${fero?sec(++n,"Feromônio","",`<div class="f3">${tog("Comprou fero?","feroBought",b.feroBought)}${b.feroBought?inp("Quantidade","feroQty",b.feroQty,"number")+money("Valor (un)","feroPrice",b.feroPrice):""}</div><span class="mkt" data-mk="fero"></span>`):""}
   ${sec(++n,"Gastos adicionais","Tudo em dólar ($). Só preencha o que você comprou.",`
     <div class="sub"><b>Food</b>${useFab?`<div class="mu" style="margin-top:6px">Food fabricada: o custo dela (${usd(fabC(b))}) entra neste breed.</div>`:`<div class="f2">${tog("Comprou a food?","foodBought",b.foodBought)}${b.foodBought?money("Valor da food","foodPrice",b.foodPrice):"<div></div>"}</div><span class="mkt" data-mk="food"></span>`}</div>
