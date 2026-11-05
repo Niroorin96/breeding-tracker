@@ -385,10 +385,14 @@ const F=(p,fid)=>(p.fabs||[]).find(f=>f.id===fid);
 const L=(p,fid)=>fid?F(p,fid).breeds:p.breeds;
 const baseCost=b=>(+b.fixed||0)+(b.method!=="Grátis"&&b.feroBought?(+b.feroQty||0)*(+b.feroPrice||0):0)+(b.foodBought?(+b.foodPrice||0):0)+stC(b);
 const fabCur=f=>{const d=f.breeds.filter(b=>b.status==="Finalizado"&&+b.rQ);const l=d[d.length-1];return l?{iv:l.rIV,q:l.rQ}:{iv:f.iv,q:f.q}};
-const fabCost=f=>(f.bought?(+f.price||0):0)+f.breeds.filter(b=>b.status==="Finalizado").reduce((s,b)=>s+baseCost(b),0);
+const fabCostD=(f,d)=>d>8?0:(f.bought?(+f.price||0):0)+f.breeds.filter(b=>b.status==="Finalizado").reduce((s,b)=>{const g=b.fab&&findFab(b.fab);return s+baseCost(b)+(g?fabCostD(g,d+1):0)},0);
+const fabCost=f=>fabCostD(f,0);
 const fabC=b=>{const f=b.fab&&findFab(b.fab);return f?fabCost(f):0};
 const cost=b=>baseCost(b)+fabC(b);
-const fabUsedBy=(p,f)=>f.usedIn?p.breeds.find(b=>b.id===f.usedIn&&b.fab===f.id):null;
+const allB=p=>[...p.breeds,...(p.fabs||[]).flatMap(f=>f.breeds)];
+const fabUsedBy=(p,f)=>f.usedIn?allB(p).find(b=>b.id===f.usedIn&&b.fab===f.id):null;
+const bLabel=(p,u)=>{const i=p.breeds.indexOf(u);if(i>=0)return"breed "+(i+1);const pf=(p.fabs||[]).find(x=>x.breeds.includes(u));return pf?"F"+(p.fabs.indexOf(pf)+1)+" · breed "+(pf.breeds.indexOf(u)+1):""};
+const usesFab=(p,x,id,d=0)=>d<9&&x.breeds.some(b=>b.fab&&(b.fab===id||(F(p,b.fab)&&usesFab(p,F(p,b.fab),id,d+1))));
 const fabSt=(p,f)=>fabUsedBy(p,f)?"Usada":f.breeds.some(b=>b.status==="Chocando")?"Chocando":"Disponível";
 /* custo das foods fabricadas que ainda não entraram num breed finalizado (entra no gasto total, fora da média por breed) */
 const pendFab=p=>sum((p.fabs||[]).filter(f=>{const u=fabUsedBy(p,f);return!u||u.status!=="Finalizado"}).map(fabCost));
@@ -741,22 +745,23 @@ function simCard(p){const B=simBase(p),o=simOpts(p,B),fld=(l,k,v,ph,$)=>`<div><l
   <div id="simout" style="margin-top:6px">${simOut(p)}</div></div>`}
 /* ===== Foods fabricadas: seção na página do Pokémon ===== */
 function fabSection(p){
-  const fs=(p.fabs||[]).map((f,i)=>({f,i})),open=fs.filter(x=>fabSt(p,x.f)!=="Usada").reverse(),used=fs.filter(x=>fabSt(p,x.f)==="Usada").reverse(),c=cur(p);
-  return`<div class="row" style="flex-wrap:wrap;margin-top:26px"><b>Foods fabricadas</b><span class="sp"></span>${used.length?`<button class="sm" data-act="togused">${ui.showUsed?"Ocultar":"Mostrar"} usadas (${used.length})</button>`:""}<button class="sm" data-act="newfab" data-id="${p.id}">+ Nova food fabricada</button></div>
-  <div class="hint">A food precisa ter no mínimo a qualidade do alvo − 0.150. Para este ${esc(p.name)} agora: <b>${q3(Math.max(0,c.q-.15))}</b> ou mais. Quando não der para comprar uma food assim, fabrique aqui; o custo dela entra no breed onde for usada.</div>
-  ${open.length||(ui.showUsed&&used.length)?`<div class="fabs">${open.map(x=>fabCard(p,x.f,x.i)).join("")}${ui.showUsed?used.map(x=>fabCard(p,x.f,x.i)).join(""):""}</div>`:""}`;
+  const fs=(p.fabs||[]).map((f,i)=>({f,i})),open=fs.filter(x=>fabSt(p,x.f)!=="Usada").reverse(),used=fs.filter(x=>fabSt(p,x.f)==="Usada").reverse(),c=cur(p),
+    HA=ui.fabAll||(ui.fabAll=Store.get("piw_fabhide")||{}),hid=!!HA[p.id];
+  return`<div class="row" style="flex-wrap:wrap;margin-top:26px"><b>Foods fabricadas</b><span class="sp"></span>${fs.length?`<button class="sm" data-act="togfabs" data-id="${p.id}">${hid?"Mostrar":"Ocultar"} todas as foods (${fs.length})</button>`:""}${used.length&&!hid?`<button class="sm" data-act="togused">${ui.showUsed?"Ocultar":"Mostrar"} usadas (${used.length})</button>`:""}<button class="sm" data-act="newfab" data-id="${p.id}">+ Nova food fabricada</button></div>
+  ${hid?"":`<div class="hint">A food precisa ter no mínimo a qualidade do alvo − 0.150. Para este ${esc(p.name)} agora: <b>${q3(Math.max(0,c.q-.15))}</b> ou mais. Quando não der para comprar uma food assim, fabrique aqui; o custo dela entra no breed onde for usada. Uma food fabricada também pode usar outra food fabricada nos breeds dela.</div>
+  ${open.length||(ui.showUsed&&used.length)?`<div class="fabs">${open.map(x=>fabCard(p,x.f,x.i)).join("")}${ui.showUsed?used.map(x=>fabCard(p,x.f,x.i)).join(""):""}</div>`:""}`}`;
 }
 function fabCard(p,f,i){
-  const c=fabCur(f),st=fabSt(p,f),u=fabUsedBy(p,f),un=u?p.breeds.indexOf(u)+1:0,bs=f.breeds.map((b,j)=>({b,n:j+1})).reverse(),
+  const c=fabCur(f),st=fabSt(p,f),u=fabUsedBy(p,f),ul=u?bLabel(p,u):"",bs=f.breeds.map((b,j)=>({b,n:j+1})).reverse(),
     FF=ui.fabFin||(ui.fabFin=Store.get("piw_fabfin")||{}),run=bs.filter(x=>x.b.status!=="Finalizado"),dn=bs.filter(x=>x.b.status==="Finalizado"),show=!!FF[f.id];
-  return`<div class="card fab"><div class="fh">${spr(f.name,"sm",rar(c.q)[1])}<div><b>F${i+1} · ${esc(f.name)}</b><div class="mu">IV ${esc(c.iv)} · ${q3(f.q)} → <b style="color:var(--tx)">${q3(c.q)}</b></div></div><span class="sp"></span><span class="fst ${st}">${st}${un?" · breed "+un:""}</span></div>
+  return`<div class="card fab"><div class="fh">${spr(f.name,"sm",rar(c.q)[1])}<div><b>F${i+1} · ${esc(f.name)}</b><div class="mu">IV ${esc(c.iv)} · ${q3(f.q)} → <b style="color:var(--tx)">${q3(c.q)}</b></div></div><span class="sp"></span><span class="fst ${st}">${st}${ul?" · "+ul:""}</span></div>
   <div class="kv"><div><small>Base</small>${f.bought?usd(+f.price||0):"já era sua"}</div><div><small>Breeds</small>${fin(f).length} de ${f.breeds.length}</div><div><small>Custo</small><b class="usd">${usd(fabCost(f))}</b></div></div>
   <div class="fb">${st!=="Usada"?`<button class="sm pri" data-act="newb" data-id="${p.id}" data-fab="${f.id}">+ Breed</button>`:""}<button class="sm" data-act="editfab" data-id="${p.id}" data-fab="${f.id}">Editar</button><button class="sm" data-act="delfab" data-id="${p.id}" data-fab="${f.id}" title="Excluir food" aria-label="Excluir food">🗑️</button></div>
   ${run.length?`<div class="fl">${run.map(x=>fabRow(p,f,x.b,x.n)).join("")}</div>`:""}
   ${dn.length?`<div class="tog"><button class="sm" data-act="togfab" data-fab="${f.id}">${show?"Ocultar":"Mostrar"} finalizados (${dn.length})</button></div>${show?`<div class="fl fl2">${dn.map(x=>fabRow(p,f,x.b,x.n)).join("")}</div>`:""}`:""}</div>`;
 }
-function fabRow(p,f,b,n){const g=(+b.rQ||0)-(+b.tQ||0);
-  return`<div class="fr"><b>#${n}</b><span class="stt ${esc(b.status)}"><i></i>${esc(b.status)}</span><span>${q3(b.tQ)} → ${+b.rQ?q3(b.rQ)+` <span class="${g>0?"up":"eq"}">${g>0?"+"+q3(g):"±0"}</span>`:"…"}</span><span class="sp"></span><span class="usd">${usd(baseCost(b))}</span>
+function fabRow(p,f,b,n){const g=(+b.rQ||0)-(+b.tQ||0),sf=b.fab&&F(p,b.fab);
+  return`<div class="fr"><b>#${n}</b><span class="stt ${esc(b.status)}"><i></i>${esc(b.status)}</span><span>${q3(b.tQ)} → ${+b.rQ?q3(b.rQ)+` <span class="${g>0?"up":"eq"}">${g>0?"+"+q3(g):"±0"}</span>`:"…"}</span>${sf?`<span class="mu" title="Usou a food fabricada F${p.fabs.indexOf(sf)+1}">· usa F${p.fabs.indexOf(sf)+1}</span>`:""}<span class="sp"></span><span class="usd">${usd(cost(b))}</span>
   <span class="fbt"><button class="sm" data-act="resb" data-id="${p.id}" data-fab="${f.id}" data-b="${b.id}">Resultado</button><button class="sm" data-act="editb" data-id="${p.id}" data-fab="${f.id}" data-b="${b.id}">Editar</button><button class="sm" data-act="delbc" data-id="${p.id}" data-fab="${f.id}" data-b="${b.id}" title="Excluir breed" aria-label="Excluir breed">🗑️</button></span></div>`;
 }
 const inp=(l,k,v,t="text",x="")=>`<div><label>${l}</label><input name="${k}" type="${t}" ${t==="number"?'step="any"':""} value="${esc(v)}" ${x}></div>`;
@@ -829,7 +834,7 @@ Meu nick: ${esc(nk)}</pre>
   const stones=b.stones.map((x,i)=>{const tp=x.type||pst(p)[i]||"";return`<div class="stb"><input type="hidden" name="st_type_${i}" value="${esc(tp)}"><div class="row">${stoneImg(tp)}<b>${esc(tp||"Stone não definida")}</b><span class="sp"></span><span class="mkt" data-mk="st:${esc(tp)}" data-i="${i}"></span></div>${tp?"":'<div class="mu">Defina a stone em “Editar Pokémon”.</div>'}
   <div class="f3">${tog("Comprou?","st_bought_"+i,x.bought)}${x.bought?inp("Quantidade","st_qty_"+i,x.qty,"number")+money("Valor (un)","st_price_"+i,x.price):""}</div></div>`}).join("");
   /* foods fabricadas disponíveis para este breed (só nos breeds do alvo) */
-  const avail=fz?[]:(p.fabs||[]).filter(f=>{const u=fabUsedBy(p,f);return(!u||u.id===b.id)&&!f.breeds.some(x=>x.status==="Chocando")}),useFab=!fz&&b.fabOn;
+  const avail=(p.fabs||[]).filter(f=>{const u=fabUsedBy(p,f);return(!u||u.id===b.id)&&!f.breeds.some(x=>x.status==="Chocando")&&(!fz||(f.id!==fz.id&&!usesFab(p,f,fz.id)))}),useFab=b.fabOn;
   const fabPick=useFab?(avail.length?`<div class="fabsel"><label>Qual food fabricada?</label><select name="fab"><option value="">Escolha…</option>${avail.map(f=>{const c=fabCur(f);return`<option value="${f.id}" ${f.id===b.fab?"selected":""}>F${p.fabs.indexOf(f)+1} · ${esc(f.name)} · IV ${esc(c.iv)} · ${q3(c.q)} · ${usd(fabCost(f))}</option>`}).join("")}</select></div>`:`<div class="warn">Nenhuma food fabricada disponível. Crie uma em "Foods fabricadas", na página do Pokémon.</div>`):"";
   const ro=useFab?"readonly":"";
   let n=0;
@@ -837,7 +842,7 @@ Meu nick: ${esc(nk)}</pre>
   <form data-form="b">${dl}
   ${sec(++n,"Informações do breed","",`<div class="f2">${sel("Status","status",b.status,S_)}${sel("Método","method",b.method,["Grátis","Feromônio"])}</div>${inp("Data / horário","date",b.date)}`)}
   ${sec(++n,fz?"Food que está sendo fabricada":"Pokémon inicial",fz?"Valores atuais da food fabricada.":"O Pokémon que você já tem (valores atuais).",`<div class="f2">${inp("IV","tIV",b.tIV,"number")}${inp("Qualidade","tQ",b.tQ,"number")}</div>`)}
-  ${sec(++n,"Food","O Pokémon que será usado como food neste breed.",`${fz?"":`<div class="f2">${tog("Usar food fabricada?","fabOn",useFab)}<div></div></div>`}${fabPick}<div class="err fqwarn" id="fqwarn" style="display:${fw?"block":"none"}">${fw}</div><div class="f3">${inp("Nome","fName",b.fName,"text",'list="dl-pk" autocomplete="off" '+ro)}${inp("IV","fIV",b.fIV,"number",ro)}${inp("Qualidade","fQ",b.fQ,"number",(fw?'class="bad" ':"")+ro)}</div>`)}
+  ${sec(++n,"Food","O Pokémon que será usado como food neste breed.",<div class="f2">${tog("Usar food fabricada? (Não = food comprada)","fabOn",useFab)}<div></div></div>${fabPick}<div class="err fqwarn" id="fqwarn" style="display:${fw?"block":"none"}">${fw}</div><div class="f3">${inp("Nome","fName",b.fName,"text",'list="dl-pk" autocomplete="off" '+ro)}${inp("IV","fIV",b.fIV,"number",ro)}${inp("Qualidade","fQ",b.fQ,"number",(fw?'class="bad" ':"")+ro)}</div>`)}
   ${fero?sec(++n,"Feromônio","",`<div class="f3">${tog("Comprou fero?","feroBought",b.feroBought)}${b.feroBought?inp("Quantidade","feroQty",b.feroQty,"number")+money("Valor (un)","feroPrice",b.feroPrice):""}</div><span class="mkt" data-mk="fero"></span>`):""}
   ${sec(++n,"Gastos adicionais","Tudo em dólar ($). Só preencha o que você comprou.",`
     <div class="sub"><b>Food</b>${useFab?`<div class="mu" style="margin-top:6px">Food fabricada: o custo dela (${usd(fabC(b))}) entra neste breed.</div>`:`<div class="f2">${tog("Comprou a food?","foodBought",b.foodBought)}${b.foodBought?money("Valor da food","foodPrice",b.foodPrice):"<div></div>"}</div><span class="mkt" data-mk="food"></span>`}</div>
@@ -893,7 +898,7 @@ document.addEventListener("click",async e=>{
   if(a==="newfab"){ui.modal={t:"fab",pid:id};return render()}
   if(a==="editfab"){ui.modal={t:"fab",pid:id,fid,edit:true};return render()}
   if(a==="delfab"){const p=P(id),f=F(p,fid),u=fabUsedBy(p,f);
-    if(confirm(u?`Esta food está ligada ao Breeding ${p.breeds.indexOf(u)+1}. Excluir mesmo assim? O custo dela sai desse breed.`:"Excluir esta food fabricada e os breeds dela?")){if(u)u.fab="";p.fabs=p.fabs.filter(x=>x.id!==fid);save()}return render()}
+    if(confirm(u?`Esta food está ligada ao ${bLabel(p,u)||"breed"}. Excluir mesmo assim? O custo dela sai desse breed.`:"Excluir esta food fabricada e os breeds dela?")){if(u)u.fab="";p.fabs=p.fabs.filter(x=>x.id!==fid);save()}return render()}
   /* seta do market: copia o preço para a caixa "Valor (un)" da stone (marca "Comprou? Sim" se precisar) */
   if(a==="mkcp"){const f=t.closest("form"),i=+t.dataset.i,v=+t.dataset.v,el=f&&f.elements["st_price_"+i];
     if(el){el.value=v;el.classList.add("got");setTimeout(()=>el.classList.remove("got"),700)}else if(f){ui.modal.b=readForm(f,ui.modal.b);const x=ui.modal.b.stones[i];if(x){x.bought=true;x.price=v}keepScroll()}return}
@@ -903,6 +908,7 @@ document.addEventListener("click",async e=>{
   if(a==="togan"){ui.hideAn=!ui.hideAn;Store.set("piw_hideAn",ui.hideAn);return render()}
   if(a==="togsim"){ui.hideSim=!ui.hideSim;Store.set("piw_hideSim",ui.hideSim);return render()}
   if(a==="togused"){ui.showUsed=!ui.showUsed;return render()}
+    if(a==="togfabs"){const HA=ui.fabAll||(ui.fabAll=Store.get("piw_fabhide")||{});HA[id]=!HA[id];Store.set("piw_fabhide",HA);return render()}
   if(a==="togfab"){const FF=ui.fabFin||(ui.fabFin=Store.get("piw_fabfin")||{}),k=t.dataset.fab;FF[k]=!FF[k];Store.set("piw_fabfin",FF);return render()}
   if(a==="togdone"){ui.hideDone=!ui.hideDone;Store.set("piw_hide",ui.hideDone);return render()}
   if(a==="delbc"&&confirm("Excluir este breed? Essa ação não pode ser desfeita.")){delBreed(P(id),fid,t.dataset.b);save();return render()}
@@ -945,20 +951,20 @@ function trySaveBreed(){
   const p=P(m.pid),b=m.b;
   if(b.method==="Grátis")b.feroBought=false;
   b.stones.forEach(x=>{if(!x.bought){x.qty=0;x.price=0}});
-  delete b.fabOn;if(m.fid)b.fab="";
+  delete b.fabOn;
   putBreed(p,m.fid,b,m.edit);
   save();ui.modal=null;render();
 }
 /* grava o breed na lista certa (alvo ou food fabricada) e mantém a ligação food fabricada ↔ breed do alvo */
 function putBreed(p,fid,b,edit){
-  if(fid){const f=F(p,fid);if(edit)f.breeds=f.breeds.map(x=>x.id===b.id?b:x);else f.breeds.push(b);return}
-  if(edit)p.breeds=p.breeds.map(x=>x.id===b.id?b:x);else p.breeds.push(b);
-  (p.fabs||[]).forEach(f=>{if(f.usedIn===b.id&&f.id!==b.fab)f.usedIn=null});
-  const f=b.fab&&F(p,b.fab);if(f)f.usedIn=b.id;else b.fab="";
+  if(fid){const f=F(p,fid);if(edit)f.breeds=f.breeds.map(x=>x.id===b.id?b:x);else f.breeds.push(b)}
+  else{if(edit)p.breeds=p.breeds.map(x=>x.id===b.id?b:x);else p.breeds.push(b)}
+  (p.fabs||[]).forEach(g=>{if(g.usedIn===b.id&&g.id!==b.fab)g.usedIn=null});
+  const g=b.fab&&F(p,b.fab);if(g)g.usedIn=b.id;else b.fab="";
 }
 function delBreed(p,fid,bid){
-  if(fid){const f=F(p,fid);f.breeds=f.breeds.filter(x=>x.id!==bid);return}
-  p.breeds=p.breeds.filter(x=>x.id!==bid);(p.fabs||[]).forEach(f=>{if(f.usedIn===bid)f.usedIn=null});
+  if(fid){const f=F(p,fid);f.breeds=f.breeds.filter(x=>x.id!==bid)}else p.breeds=p.breeds.filter(x=>x.id!==bid);
+  (p.fabs||[]).forEach(f=>{if(f.usedIn===bid)f.usedIn=null});
 }
 const warnHtml=()=>{const w=ui.warn;return`<div class="modal"><div class="card"><b class="big">⚠ ${w.title}</b><p>${w.msg}</p><div class="row" style="margin-top:14px;flex-wrap:wrap"><span class="sp"></span>${w.btns.map(x=>`<button type="button" class="${x[2]}" data-act="${x[1]}">${x[0]}</button>`).join("")}</div></div></div>`};
 document.addEventListener("submit",e=>{
